@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="nummist.illusion.mixedreality.MarkerPool"/>
+    <classEntry path="nummist.illusion.mixedreality.AbstractTracker"/>
+    <classEntry path="nummist.illusion.mixedreality.ARViewport"/>
+    <classEntry path="nummist.illusion.mixedreality.flare.FlareUtils"/>
+    <classEntry path="nummist.illusion.core.Loader"/>
+    <classEntry path="nummist.illusion.core.ILoaderDelegate"/>
+    <classEntry path="nummist.illusion.core.StringUtils"/>
+    <classEntry path="nummist.illusion.mixedreality.MarkerPoolIterator"/>
+    <classEntry path="nummist.illusion.graphics.models.IExternalModelPrefabLoaderDelegate"/>
+    <classEntry path="nummist.illusion.mixedreality.flare.FlareBarcodeTracker"/>
+    <classEntry path="nummist.illusion.graphics.models.ExternalModelUtils"/>
+    <classEntry path="nummist.illusion.graphics.models.ExternalModelPrefab"/>
+    <classEntry path="nummist.illusion.mixedreality.MarkerEvent"/>
+    <classEntry path="nummist.illusion.mixedreality.ITrackerDelegate"/>
+    <classEntry path="nummist.illusion.core.Logger"/>
+    <classEntry path="nummist.illusion.core.MathUtils"/>
+    <classEntry path="nummist.illusion.mixedreality.flare.IFlareVirtualButtonDelegate"/>
+    <classEntry path="nummist.illusion.mixedreality.flare.IFlareDataMatrixDelegate"/>
+    <classEntry path="nummist.illusion.mixedreality.flare.FlareBarcodeFeatureSet"/>
+    <classEntry path="nummist.illusion.graphics.lights.LightingUtils"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>
