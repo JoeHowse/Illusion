@@ -33,6 +33,7 @@ package nummist.illusion.mixedreality
 	 * @see AbstractTracker
 	 * 
 	 * @author Joseph Howse
+	 * 
 	 * @flowerModelElementId _8IU-gKnjEeG8rNJMqBg6NQ
 	 */
 	public interface ITrackerDelegate
@@ -47,10 +48,13 @@ package nummist.illusion.mixedreality
 		 * @param tracker The AbstractTracker subclass instance.
 		 * 
 		 * @param markerPools The MarkerPool objects.
+		 * 
 		 * @flowerModelElementId _8IU-gqnjEeG8rNJMqBg6NQ
 		 */
-		 function onTrackerStarted
-		(tracker:AbstractTracker, markerPools:Vector.<MarkerPool>
+		function onTrackerStarted
+		(
+			tracker:AbstractTracker,
+			markerPools:Vector.<MarkerPool>
 		)
 		:void;
 		
@@ -67,10 +71,14 @@ package nummist.illusion.mixedreality
 		 * AbstractTracker subclass instance.
 		 * 
 		 * @param markerPool The MarkerPool object.
+		 * 
 		 * @flowerModelElementId _8IVllKnjEeG8rNJMqBg6NQ
 		 */
-		 function onMarkerPoolHasExcessDemand
-		(tracker:AbstractTracker, markerPoolIndex:uint, markerPool:MarkerPool
+		function onMarkerPoolHasExcessDemand
+		(
+			tracker:AbstractTracker,
+			markerPoolIndex:uint,
+			markerPool:MarkerPool
 		)
 		:void;
 	}

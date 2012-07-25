@@ -51,6 +51,7 @@ package nummist.illusion.mixedreality.flare
 	 * @see AbstractTracker
 	 * 
 	 * @author Joseph Howse
+	 * 
 	 * @flowerModelElementId _8FGEUKnjEeG8rNJMqBg6NQ
 	 */
 	public class FlareBarcodeTracker extends AbstractTracker
@@ -99,10 +100,18 @@ package nummist.illusion.mixedreality.flare
 		 * @throws ArgumentError if <code>delegate</code>,
 		 * <code>pixelFeed</code>, <code>scene3D</code>, or
 		 * <code>featureSet</code> is <code>null</code>.
+		 * 
 		 * @flowerModelElementId _8FbbgKnjEeG8rNJMqBg6NQ
 		 */
 		public function FlareBarcodeTracker
-		(delegate:ITrackerDelegate, pixelFeed:PixelFeed, scene3D:Object3D, featureSet:FlareBarcodeFeatureSet, autoStart:Boolean=true, dataPath:String="data/", licenseFilename:String="flareTracker.lic"
+		(
+			delegate:ITrackerDelegate,
+			pixelFeed:PixelFeed,
+			scene3D:Object3D,
+			featureSet:FlareBarcodeFeatureSet,
+			autoStart:Boolean=true,
+			dataPath:String="data/",
+			licenseFilename:String="flareTracker.lic"
 		)
 		{
 			dataMatrixDelegate_ = delegate as IFlareDataMatrixDelegate;
@@ -266,7 +275,9 @@ package nummist.illusion.mixedreality.flare
 		
 		
 		override protected function updateTrackedMarkers
-		(markerPoolIterators:Vector.<MarkerPoolIterator>, pixels:ByteArray
+		(
+			markerPoolIterators:Vector.<MarkerPoolIterator>,
+			pixels:ByteArray
 		)
 		:void
 		{
@@ -295,23 +306,8 @@ package nummist.illusion.mixedreality.flare
 				// Read the marker's ID.
 				var markerID:int = nativeBuffer_.readInt();
 				
-				if
-				(
-					dataMatrixDelegate_ &&
-					markerType == MARKER_DATA_MATRIX
-				)
-				{
-					// Dispatch the data matrix's message to the delegate.
-					dataMatrixDelegate_.onDataMatrixMessage
-					(
-						this,
-						markerID,
-						nativeTracker_.getDataMatrixMessage(i)
-					);
-				}
-				
 				// Adjust the ID to align it with the marker pool index.
-				else if (markerType == MARKER_SIMPLE_ID)
+				if (markerType == MARKER_SIMPLE_ID)
 				{
 					markerID += simpleIDMarkerPoolsStart_;
 				}
@@ -371,6 +367,21 @@ package nummist.illusion.mixedreality.flare
 						MarkerEvent.FOUND,
 						markerPoolIterators[markerID].markerPool
 					));
+					
+					if
+					(
+						markerType == MARKER_DATA_MATRIX &&
+						dataMatrixDelegate_
+					)
+					{
+						// Dispatch the data matrix's message to the delegate.
+						dataMatrixDelegate_.onDataMatrixMessage
+						(
+							this,
+							markerID,
+							nativeTracker_.getDataMatrixMessage(i)
+						);
+					}
 				}
 			}
 		}

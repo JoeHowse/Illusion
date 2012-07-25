@@ -28,14 +28,16 @@ package nummist.illusion.mixedreality.flare
 {
 	/**
 	 * A delegate providing a callback to a FlareBarcodeTracker object for the
-	 * sake of handling messages decoded from data matrix barcodes.
+	 * sake of handling messages decoded from data matrix barcodes when the
+	 * barcode is newly found.
+	 * 
 	 * @flowerModelElementId _8GvqIKnjEeG8rNJMqBg6NQ
 	 */
 	public interface IFlareDataMatrixDelegate
 	{
 		/**
 		 * Handles a message decoded from a data matrix barcode by the specifed
-		 * FlareBarcodeTracker object.
+		 * FlareBarcodeTracker object when the barcode is newly found.
 		 * 
 		 * @param tracker The FlareBarcodeTracker object.
 		 * 
@@ -43,10 +45,14 @@ package nummist.illusion.mixedreality.flare
 		 * FlareNaturalFeatureTracker object.
 		 * 
 		 * @param message The message as plain text.
+		 * 
 		 * @flowerModelElementId _8GwRManjEeG8rNJMqBg6NQ
 		 */
-		 function onDataMatrixMessage
-		(tracker:FlareBarcodeTracker, markerID:uint, message:String
+		function onDataMatrixMessage
+		(
+			tracker:FlareBarcodeTracker,
+			markerID:uint,
+			message:String
 		)
 		:void;
 	}

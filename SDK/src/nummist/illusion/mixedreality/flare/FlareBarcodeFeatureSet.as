@@ -35,6 +35,7 @@ package nummist.illusion.mixedreality.flare
 	 * @see FlareBarcodeTracker
 	 * 
 	 * @author Joseph Howse
+	 * 
 	 * @flowerModelElementId _8D38UKnjEeG8rNJMqBg6NQ
 	 */
 	public class FlareBarcodeFeatureSet
@@ -54,35 +55,22 @@ package nummist.illusion.mixedreality.flare
 		public const templateFilenames:Vector.<String> = new Vector.<String>();
 		
 		
-		
 		private var numSimpleIDs_:uint = 0;
-		
 		private var simpleIDMillimeters_:Number = 80;
-		
 		private var simpleIDBorderRatio_:Number = 0.125;
 		
-		
 		private var numBCHs_:uint = 0;
-		
 		private var bchMillimeters_:Number = 80;
-		
 		private var bchBorderRatio_:Number = 0.125;
 		
-		
 		private var templateBorderRatio_:Number = 0.25;
-		
 		private var templatePatternSize_:uint = 16;
 		
-		
 		private var numFrames_:uint = 0;
-		
 		private var frameMillimeters_:Number = 100;
-		
 		private var frameBorderRatio_:Number = 0.04545;
 		
-		
 		private var numDataMatrices_:uint = 0;
-		
 		private var dataMatrixBorderRatio_:Number = 0.035;
 		
 		

@@ -24,47 +24,18 @@ josephhowse@nummist.com
 */
 
 
-package nummist.illusion.core
+package nummist.illusion.logic
 {
 	/**
-	 * A logger with configurable verbosity.
+	 * An object that can generate a Boolean representation of itself.
 	 * 
 	 * @author Joseph Howse
-	 * 
-	 * @flowerModelElementId _7_8ekKnjEeG8rNJMqBg6NQ
 	 */
-	public class Logger
+	public interface ILogicalStatement
 	{
 		/**
-		 * A shared instance.
+		 * A Boolean representation of this object.
 		 */
-		public static const mainLogger:Logger = new Logger();
-		
-		
-		/**
-		 * The maximum level of message that is logged.
-		 */
-		public var verbosity:uint = 0;
-		
-		
-		/**
-		 * Log the specified message with the specified tag and level, if the
-		 * level is less than or equal to the verbosity.
-		 * 
-		 * @param tag The tag, such as the name of the class or library that is
-		 * generating the message.
-		 * 
-		 * @param level The priority level, with 0 being the highest priority
-		 * (always logged), 1 the next-to-highest, and so on.
-		 * 
-		 * @message The message.
-		 */
-		public function log(tag:String, level:uint, message:String):void
-		{
-			if (level <= verbosity)
-			{
-				trace(tag + ": [" + level + "] " + message);
-			}
-		}
+		function toBoolean():Boolean;
 	}
 }

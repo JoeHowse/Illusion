@@ -30,6 +30,7 @@ package nummist.illusion.core
 	 * Static utility functions for crunching numbers.
 	 * 
 	 * @author Joseph Howse
+	 * 
 	 * @flowerModelElementId _8AYjcKnjEeG8rNJMqBg6NQ
 	 */
 	public class MathUtils

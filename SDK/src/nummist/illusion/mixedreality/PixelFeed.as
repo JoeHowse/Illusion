@@ -28,27 +28,42 @@ package nummist.illusion.mixedreality
 {
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
+	import flash.display.StageQuality;
 	import flash.events.Event;
 	import flash.geom.Matrix;
 	import flash.geom.Rectangle;
 	import flash.utils.ByteArray;
 	
+	import mx.logging.Log;
+	
+	import nummist.illusion.logic.ILogicalStatement;
+	
 	
 	/**
-	 * A producer of bitmap and projection data, as used by AbstractTracker
+	 * A producer of pixel data and projection data, as used by AbstractTracker
 	 * subclasses and ARViewport.
 	 * 
 	 * @see AbstractTracker
 	 * 
 	 * @see ARViewport
+	 * 
 	 * @flowerModelElementId _8JkUoKnjEeG8rNJMqBg6NQ
 	 */
 	public class PixelFeed
 	{
+		/**
+		 * A condition that must be true in order for the pixel data to be
+		 * updated. If the condition is <code>null</code> (the default), the
+		 * pixel data is updated every frame.
+		 */
+		public var redrawCondition:ILogicalStatement;
+		
+		
 		private var source_:DisplayObject;
 		private var diagonalFOV_:Number;
 		private var width_:uint;
 		private var height_:uint;
+		private var didRedraw_:Boolean;
 		private var pixels_:ByteArray;
 		private var bitmapData_:BitmapData;
 		private var matrix_:Matrix = new Matrix();
@@ -73,24 +88,29 @@ package nummist.illusion.mixedreality
 		 * FOV should bear some relationship to a real or simulated camera in
 		 * 3D space.
 		 * 
-		 * @param source The object to be drawn to bitmap each frame.
+		 * @param source The object whose pixel data is to be captured.
 		 * 
-		 * @param fov The bitmap's diagonal field of view, in radians.
+		 * @param fov The pixel data's diagonal field of view, in radians.
 		 * 
-		 * @param width The bitmap's horizontal pixel resolution.
+		 * @param width The pixel data's horizontal resolution.
 		 * 
-		 * @param height The bitmap's vertical pixel resolution.
+		 * @param height The pixel data's vertical resolution.
 		 * 
-		 * @throws ArgumentError if source is null or any other argument is
-		 * non-positive.
+		 * @param transparent A value of <code>true</code> means the pixel data
+		 * shall preserve transparency.
+		 * 
+		 * @throws ArgumentError if source is <code>null</code> or fov, width,
+		 * or height is non-positive.
+		 * 
 		 * @flowerModelElementId _8Jmw4qnjEeG8rNJMqBg6NQ
 		 */
 		public function PixelFeed
 		(
 			source:DisplayObject,
-			fov:Number=1.25663706143591729539, // 72 degrees
-			width:uint=320,
-			height:uint=240
+			fov:Number = 1.25663706143591729539, // 72 degrees
+			width:uint = 320,
+			height:uint = 240,
+			transparent:Boolean = false
 		)
 		{
 			if (!source)
@@ -118,13 +138,13 @@ package nummist.illusion.mixedreality
 			width_ = width;
 			height_ = height;
 			
-			bitmapData_ = new BitmapData(width, height);
+			bitmapData_ = new BitmapData(width, height, transparent);
 			rect_ = new Rectangle(0, 0, width, height);
 			
 			source.addEventListener
 			(
-				Event.ENTER_FRAME, // type
-				onSourceEnterFrame, // listener
+				Event.EXIT_FRAME, // type
+				onSourceExitFrame, // listener
 				false, // useCapture
 				0, // priority
 				true // useWeakReference
@@ -133,7 +153,7 @@ package nummist.illusion.mixedreality
 		
 		
 		/**
-		 * The object to be drawn to bitmap each frame.
+		 * The object whose pixel data is being captured.
 		 */
 		public function get source():DisplayObject
 		{
@@ -165,6 +185,15 @@ package nummist.illusion.mixedreality
 		}
 		
 		/**
+		 * A value of <code>true</code> means the pixel data was updated at the
+		 * most recent opportunity (either the current or previous frame).
+		 */
+		public function get didRedraw():Boolean
+		{
+			return didRedraw_;
+		}
+		
+		/**
 		 * Pixel data of the latest source frame that has been drawn to bitmap.
 		 */
 		public function get pixels():ByteArray
@@ -179,14 +208,32 @@ package nummist.illusion.mixedreality
 		/**
 		 * @flowerModelElementId _8JpNJKnjEeG8rNJMqBg6NQ
 		 */
-		private function onSourceEnterFrame(event:Event):void
+		private function onSourceExitFrame(event:Event):void
 		{
+			if (redrawCondition && !redrawCondition.toBoolean())
+			{
+				// Unset the redraw flag and pass.
+				didRedraw_ = false;
+				return;
+			}
+			// Set the redraw flag.
+			didRedraw_ = true;
+			
 			// Update the scaling matrix.
 			matrix_.a = width / source.width;
 			matrix_.d = height / source.height;
 			
 			// Draw the display object.
-			bitmapData_.draw(source_, matrix_);
+			bitmapData_.drawWithQuality
+			(
+				source_, // source
+				matrix_, // matrix
+				null, // colorTransform
+				null, // blendMode
+				null, // clipRect
+				false, // smoothing
+				StageQuality.LOW // quality
+			);
 			
 			// Expose the drawing's pixels.
 			pixels_ = bitmapData_.getPixels(rect_);

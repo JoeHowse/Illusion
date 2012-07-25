@@ -38,6 +38,7 @@ package nummist.illusion.mixedreality
 	 * @see MarkerEvent
 	 * 
 	 * @author Joseph Howse
+	 * 
 	 * @flowerModelElementId _8IzfoKnjEeG8rNJMqBg6NQ
 	 */
 	public class MarkerPool
@@ -62,6 +63,7 @@ package nummist.illusion.mixedreality
 		 * 
 		 * @see FlareBarcodeTracker
 		 * @see FlareNaturalFeatureTracker
+		 * 
 		 * @flowerModelElementId _8I0GsanjEeG8rNJMqBg6NQ
 		 */
 		public const markers:Vector.<Object3D> = new Vector.<Object3D>();

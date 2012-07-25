@@ -36,6 +36,7 @@ package nummist.illusion.graphics.models
 	 * @see ExternalModelPrefabLoader
 	 * 
 	 * @author Joseph Howse
+	 * 
 	 * @flowerModelElementId _8DdsoKnjEeG8rNJMqBg6NQ
 	 */
 	public interface IExternalModelPrefabLoaderDelegate
@@ -43,20 +44,28 @@ package nummist.illusion.graphics.models
 		/**
 		 * Handles the specified error type, which arose when the specified
 		 * ExternalModelPrefabLoader object tried to load the specified file.
+		 * 
 		 * @flowerModelElementId _8De6wanjEeG8rNJMqBg6NQ
 		 */
-		 function onLoadExternalModelPrefabError
-		(loader:ExternalModelPrefabLoader, filename:String, errorEventType:String
+		function onLoadExternalModelPrefabError
+		(
+			loader:ExternalModelPrefabLoader,
+			filename:String,
+			errorEventType:String
 		)
 		:void;
 		
 		/**
 		 * Handles the specified ExternalModelPrefab, which was loaded from the
 		 * specified file by the specified ExternalModelPrefabLoader object.
+		 * 
 		 * @flowerModelElementId _8DgI46njEeG8rNJMqBg6NQ
 		 */
-		 function onLoadExternalModelPrefabComplete
-		(loader:ExternalModelPrefabLoader, filename:String, externalModelPrefab:ExternalModelPrefab
+		function onLoadExternalModelPrefabComplete
+		(
+			loader:ExternalModelPrefabLoader,
+			filename:String,
+			externalModelPrefab:ExternalModelPrefab
 		)
 		:void;
 	}

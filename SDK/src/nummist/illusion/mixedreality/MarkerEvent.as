@@ -38,6 +38,7 @@ package nummist.illusion.mixedreality
 	 * @see MarkerPool
 	 * 
 	 * @author Joseph Howse
+	 * 
 	 * @flowerModelElementId _8IldMKnjEeG8rNJMqBg6NQ
 	 */
 	public class MarkerEvent extends Event3D
@@ -51,6 +52,7 @@ package nummist.illusion.mixedreality
 		/**
 		 * A constant that defines the value of a MarkerEvent's type property
 		 * when the marker is newly lost.
+		 * 
 		 * @flowerModelElementId _8ImrUanjEeG8rNJMqBg6NQ
 		 */
 		public static const LOST:String = "lost";
@@ -68,6 +70,7 @@ package nummist.illusion.mixedreality
 		 * 
 		 * @param markerPool The MarkerPool object that holds the target
 		 * object.
+		 * 
 		 * @flowerModelElementId _8InSYKnjEeG8rNJMqBg6NQ
 		 */
 		public function MarkerEvent(type:String, markerPool:MarkerPool)

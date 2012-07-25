@@ -36,6 +36,7 @@ package nummist.illusion.graphics.lights
 	 * Static utility functions for creating lighting setups.
 	 * 
 	 * @author Joseph Howse
+	 * 
 	 * @flowerModelElementId _JtkjMLQLEeGR3Y9FTHwn1w
 	 */
 	public class LightingUtils

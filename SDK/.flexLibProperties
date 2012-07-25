@@ -21,6 +21,8 @@
     <classEntry path="nummist.illusion.mixedreality.flare.IFlareDataMatrixDelegate"/>
     <classEntry path="nummist.illusion.mixedreality.flare.FlareBarcodeFeatureSet"/>
     <classEntry path="nummist.illusion.graphics.lights.LightingUtils"/>
+    <classEntry path="nummist.illusion.logic.ILogicalStatement"/>
+    <classEntry path="nummist.illusion.logic.CameraSeesActivity"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

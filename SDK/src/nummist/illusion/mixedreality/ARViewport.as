@@ -29,23 +29,23 @@ package nummist.illusion.mixedreality
 	import alternativa.engine3d.core.Camera3D;
 	import alternativa.engine3d.core.Object3D;
 	import alternativa.engine3d.core.View;
+	import alternativa.engine3d.objects.Mesh;
 	
 	import flash.display.DisplayObject;
 	import flash.display.Sprite;
 	import flash.display.Stage3D;
-	import flash.display.StageAlign;
 	import flash.events.Event;
 	import flash.geom.Matrix;
-	import flash.media.Video;
 	
 	
 	/**
 	 * A pairing of a 3D viewport and a 2D background, based on a PixelFeed
-	 * object's projection data and its source of bitmap data.
+	 * object's projection data and its source of pixel data.
 	 * 
 	 * @see PixelFeed
 	 * 
 	 * @author Joseph Howse
+	 * 
 	 * @flowerModelElementId _8HXVMKnjEeG8rNJMqBg6NQ
 	 */
 	public class ARViewport extends Sprite
@@ -56,6 +56,7 @@ package nummist.illusion.mixedreality
 		private var camera3D_:Camera3D;
 		private var showProfilingDiagram_:Boolean = false;
 		private var mirrored_:Boolean = false;
+		private var isAnyMeshOnScreen_:Boolean = false;
 		
 		
 		/**
@@ -75,10 +76,16 @@ package nummist.illusion.mixedreality
 		 * @param farClipping The 3D projection's far clipping depth.
 		 * 
 		 * @param antialiasLevel The antialias level to apply in 3D rendering.
+		 * 
 		 * @flowerModelElementId _8Hnz4anjEeG8rNJMqBg6NQ
 		 */
 		public function ARViewport
-		(stage3D:Stage3D, pixelFeed:PixelFeed, nearClipping:Number=1, farClipping:Number=10000, antialiasLevel:int=4
+		(
+			stage3D:Stage3D,
+			pixelFeed:PixelFeed,
+			nearClipping:Number = 1,
+			farClipping:Number = 10000,
+			antialiasLevel:int = 4
 		)
 		{
 			super();
@@ -121,8 +128,8 @@ package nummist.illusion.mixedreality
 			// Listen for frame updates.
 			addEventListener
 			(
-				Event.ENTER_FRAME, // type
-				onEnterFrame, // listener
+				Event.EXIT_FRAME, // type
+				onExitFrame, // listener
 				false, // useCapture
 				0, // priority
 				true // useWeakReference
@@ -223,10 +230,27 @@ package nummist.illusion.mixedreality
 		/**
 		 * @flowerModelElementId _8HssYqnjEeG8rNJMqBg6NQ
 		 */
-		private function onEnterFrame(event:Event):void
+		private function onExitFrame(event:Event):void
 		{
-			// Redraw the 3D scene.
-			camera3D_.render(stage3D_);
+			if (isAnyMeshIn(scene3D_))
+			{
+				// There is at least one mesh in the 3D scene.
+				
+				// Redraw the 3D scene.
+				camera3D_.render(stage3D_);
+				
+				isAnyMeshOnScreen_ = true;
+			}
+			else if (isAnyMeshOnScreen_)
+			{
+				// There is no mesh in the 3D scene but there is at least one
+				// mesh rendered on screen from last frame.
+				
+				// Redraw the 3D scene.
+				camera3D_.render(stage3D_);
+				
+				isAnyMeshOnScreen_ = false;
+			}
 		}
 		
 		
@@ -241,6 +265,22 @@ package nummist.illusion.mixedreality
 			mirrorMatrix.tx = background_.width;
 			background_.transform.matrix = mirrorMatrix;
 			camera3D_.view.transform.matrix = mirrorMatrix;
+		}
+		
+		private function isAnyMeshIn(object3D:Object3D):Boolean
+		{
+			if (object3D is Mesh)
+			{
+				return true;
+			}
+			for (var i:uint; i < object3D.numChildren; i++)
+			{
+				if (isAnyMeshIn(object3D.getChildAt(i)))
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 }

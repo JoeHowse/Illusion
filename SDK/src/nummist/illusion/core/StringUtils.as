@@ -33,6 +33,7 @@ package nummist.illusion.core
 	 * Static utility functions for parsing strings, including file paths.
 	 * 
 	 * @author Joseph Howse
+	 * 
 	 * @flowerModelElementId _8AtTkKnjEeG8rNJMqBg6NQ
 	 */
 	public class StringUtils

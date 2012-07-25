@@ -44,6 +44,7 @@ package nummist.illusion.core
 	 * @see ILoaderDelegate
 	 * 
 	 * @author Joseph Howse
+	 * 
 	 * @flowerModelElementId _79vfIKnjEeG8rNJMqBg6NQ
 	 */
 	public class Loader

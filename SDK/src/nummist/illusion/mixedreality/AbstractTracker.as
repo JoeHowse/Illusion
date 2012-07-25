@@ -35,21 +35,22 @@ package nummist.illusion.mixedreality
 	
 	
 	/**
-	 * A consumer of bitmap and projection data, as produced by a PixelFeed
+	 * A consumer of pixel data and projection data, as produced by a PixelFeed
 	 * object, and a producer of MarkerPool objects that contain de-projected
-	 * representations of particular features in the bitmap data.
+	 * representations of particular features in the pixel data.
 	 * 
 	 * @see MarkerPool
 	 * @see PixelFeed
 	 * 
 	 * @author Joseph Howse
+	 * 
 	 * @flowerModelElementId _8FGrY6njEeG8rNJMqBg6NQ
 	 */
 	public class AbstractTracker
 	{
 		/**
 		 * MarkerPool objects that each correspond to a particular marker ID
-		 * being tracked in the bitmap data. Wherever a physical occurence
+		 * being tracked in the pixel data. Wherever a physical occurence
 		 * of the marker ID is identified, a virtual marker may be drawn from
 		 * the MarkerPool object and placed in the 3D scene, provided that
 		 * enough virtual markers are available.
@@ -157,7 +158,7 @@ package nummist.illusion.mixedreality
 		
 		
 		/**
-		 * Start tracking features in the bitmap data provided by the PixelFeed
+		 * Start tracking features in the pixel data provided by the PixelFeed
 		 * object, and updating markers held by the MarkerPool objects.
 		 */
 		public function start():void
@@ -165,8 +166,8 @@ package nummist.illusion.mixedreality
 			// Update the tracker each time the source enters the frame.
 			pixelFeed_.source.addEventListener
 			(
-				Event.ENTER_FRAME, // type
-				onSourceEnterFrame, // listener
+				Event.EXIT_FRAME, // type
+				onSourceExitFrame, // listener
 				false, // useCapture
 				0, // priority
 				true // useWeakReference
@@ -174,12 +175,12 @@ package nummist.illusion.mixedreality
 		}
 		
 		/**
-		 * Stop tracking features in the bitmap data provided by the PixelFeed
+		 * Stop tracking features in the pixel data provided by the PixelFeed
 		 * object, and updating markers held by the MarkerPool objects.
 		 */
 		public function stop():void
 		{
-			pixelFeed_.source.removeEventListener(Event.ENTER_FRAME, onSourceEnterFrame);
+			pixelFeed_.source.removeEventListener(Event.EXIT_FRAME, onSourceExitFrame);
 		}
 		
 		
@@ -221,8 +222,16 @@ package nummist.illusion.mixedreality
 			);
 		}
 		
-		private function onSourceEnterFrame(event:Event):void
+		private function onSourceExitFrame(event:Event):void
 		{
+			if (!pixelFeed_.didRedraw)
+			{
+				// There is nothing new to see.
+				
+				// No-op.
+				return;
+			}
+			
 			// Get iterators for the marker pools.
 			var markerPoolIterators:Vector.<MarkerPoolIterator> = new Vector.<MarkerPoolIterator>();
 			for each (var markerPool:MarkerPool in markerPools)

@@ -50,8 +50,8 @@ package nummist.illusion.graphics.materials
 	 * A TextureMaterial subclass that continually updates a diffuse map based
 	 * on a DisplayObject instance.
 	 * 
-	 * @author Joseph Howse
-	 * @author David E. Jones
+	 * @author Joseph Howse<br />David E. Jones
+	 * 
 	 * @flowerModelElementId _8BU-oKnjEeG8rNJMqBg6NQ
 	 */
 	public class DisplayObjectMaterial extends TextureMaterial
@@ -79,10 +79,14 @@ package nummist.illusion.graphics.materials
 		 * of 2, it is rounded up to the next power of 2.
 		 * 
 		 * @throws ArgumentError if displayObject is <code>null</code>.
+		 * 
 		 * @flowerModelElementId _8BZQE6njEeG8rNJMqBg6NQ
 		 */
 		public function DisplayObjectMaterial
-		(displayObject:DisplayObject, width:uint=256, height:uint=256
+		(
+			displayObject:DisplayObject,
+			width:uint=256,
+			height:uint=256
 		)
 		:void
 		{
@@ -119,8 +123,14 @@ package nummist.illusion.graphics.materials
 		/**
 		 * @flowerModelElementId _8BevoanjEeG8rNJMqBg6NQ
 		 */
-		override alternativa3d  function collectDraws
-		(camera:Camera3D, surface:Surface, geometry:Geometry, lights:Vector.<Light3D>, lightsLength:int, objectRenderPriority:int=-1
+		override alternativa3d function collectDraws
+		(
+			camera:Camera3D,
+			surface:Surface,
+			geometry:Geometry,
+			lights:Vector.<Light3D>,
+			lightsLength:int,
+			objectRenderPriority:int = -1
 		)
 		:void
 		{

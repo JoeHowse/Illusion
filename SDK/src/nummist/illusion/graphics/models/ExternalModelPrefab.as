@@ -64,6 +64,7 @@ package nummist.illusion.graphics.models
 	 * @see ExternalModelPrefabLoader
 	 * 
 	 * @author Joseph Howse
+	 * 
 	 * @flowerModelElementId _8CCwUKnjEeG8rNJMqBg6NQ
 	 */
 	public class ExternalModelPrefab
@@ -98,10 +99,14 @@ package nummist.illusion.graphics.models
 		 * relative to basePath.
 		 * 
 		 * @param objects The model's children, such as meshes.
+		 * 
 		 * @flowerModelElementId _8CQywqnjEeG8rNJMqBg6NQ
 		 */
 		public function ExternalModelPrefab
-		(basePath:String, filename:String, objects:Vector.<Object3D>
+		(
+			basePath:String,
+			filename:String,
+			objects:Vector.<Object3D>
 		)
 		{
 			basePath = StringUtils.slashTerminate(basePath);
@@ -268,7 +273,11 @@ package nummist.illusion.graphics.models
 		
 		
 		private function textureResource
-		(basePath:String, lowercaseFileExtension:String, material:ParserMaterial, textureKey:String
+		(
+			basePath:String,
+			lowercaseFileExtension:String,
+			material:ParserMaterial,
+			textureKey:String
 		)
 		:TextureResource
 		{

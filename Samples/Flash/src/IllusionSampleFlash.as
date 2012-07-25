@@ -30,14 +30,22 @@ package
 	import alternativa.engine3d.lights.DirectionalLight;
 	import alternativa.engine3d.objects.Mesh;
 	
+	import com.sociodox.theminer.*;
+	
 	import flash.display.Sprite;
 	import flash.display.Stage3D;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
-	import flash.external.ExternalInterface;
+	import flash.events.KeyboardEvent;
 	import flash.media.Camera;
 	import flash.media.Video;
+	import flash.system.Capabilities;
+	import flash.text.TextField;
+	import flash.text.TextFormat;
+	import flash.utils.getTimer;
+	
+	import flashx.textLayout.formats.TextAlign;
 	
 	import nummist.illusion.graphics.lights.LightingUtils;
 	import nummist.illusion.graphics.materials.DisplayObjectMaterial;
@@ -47,6 +55,7 @@ package
 	import nummist.illusion.mixedreality.ARViewport;
 	import nummist.illusion.mixedreality.AbstractTracker;
 	import nummist.illusion.mixedreality.ITrackerDelegate;
+	import nummist.illusion.mixedreality.MarkerEvent;
 	import nummist.illusion.mixedreality.MarkerPool;
 	import nummist.illusion.mixedreality.PixelFeed;
 	import nummist.illusion.mixedreality.flare.FlareBarcodeFeatureSet;
@@ -56,7 +65,7 @@ package
 	import nummist.illusion.mixedreality.flare.IFlareVirtualButtonDelegate;
 	
 	
-	[SWF(width='640', height='480', frameRate='60')]
+	[SWF(width='640', height='480', frameRate='30')]
 	public class IllusionSampleFlash
 	extends
 		Sprite
@@ -66,6 +75,8 @@ package
 		IFlareDataMatrixDelegate,
 		IFlareVirtualButtonDelegate
 	{
+		private const PROFILE_WITH_THE_MINER:Boolean = false;
+		
 		private var stage3D_:Stage3D;
 		private var pixelFeed_:PixelFeed;
 		private var arViewport_:ARViewport;
@@ -73,6 +84,8 @@ package
 		private var flareNaturalFeatureTracker_:FlareNaturalFeatureTracker;
 		private var applePrefab_:ExternalModelPrefab;
 		private var chalicePrefab_:ExternalModelPrefab;
+		private var rotatingMarkers_:Vector.<Object3D> = new Vector.<Object3D>();
+		private var lastMilliseconds_:int;
 		
 		
 		public function IllusionSampleFlash()
@@ -86,7 +99,7 @@ package
 				// Listen for being added to the 2D stage.
 				addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			}
-		} 
+		}
 		
 		
 		private function onAddedToStage(event:Event = null):void
@@ -96,6 +109,53 @@ package
 				removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			}
 			
+			// Create the video camera.
+			var videoCamera:Camera = Camera.getCamera();
+			
+			if (!videoCamera)
+			{
+				// There is no video camera available.
+				
+				// Display an error message.
+				
+				var textFormat:TextFormat = new TextFormat();
+				textFormat.align = TextAlign.JUSTIFY;
+				textFormat.font = "Comic Sans";
+				textFormat.size = 16;
+				textFormat.color = 0xcc0000;
+				
+				var textField:TextField = new TextField();
+				textField.width = 320;
+				textField.wordWrap = true;
+				textField.borderColor = 0xcc0000;
+				textField.text =
+					"No webcam found. Plug in a webcam, close other webcam " +
+					"apps such as Skype, and then refresh this page.";
+				textField.setTextFormat(textFormat);
+				textField.x = 320 - 0.5 * textField.textWidth;
+				textField.y = 240 - 0.5 * textField.textHeight;
+				
+				addChild(textField);
+				
+				// Do not set up anything else.
+				return;
+			}
+			
+			// Configure the video camera.
+			videoCamera.setMode(640, 480, 30); // 640x480 @ 30 FPS
+			videoCamera.setQuality(0, 100); // uncompressed (less CPU usage)
+			
+			if (PROFILE_WITH_THE_MINER && Capabilities.isDebugger)
+			{
+				// Integrate TheMiner profiling tools.
+				addChild(new TheMiner());
+			}
+			else
+			{
+				// Disable the propagation of mouse events, which are unused.
+				stage.mouseChildren = false;
+			}
+			
 			// Configure the 2D stage.
 			stage.align = StageAlign.TOP_LEFT;
 			stage.scaleMode = StageScaleMode.NO_SCALE;
@@ -103,20 +163,18 @@ package
 			// Get the 3D stage.
 			stage3D_ = stage.stage3Ds[0];
 			
-			// Create and configure the video camera.
-			var videoCamera:Camera = Camera.getCamera();
-			videoCamera.setMode(640, 480, 60); // 640x480 @ 60 FPS
-			
 			// Create and configure the video.
 			var video:Video = new Video(videoCamera.width, videoCamera.height);
 			video.attachCamera(videoCamera);
+			video.opaqueBackground = 0x000000; // no transparency
+			video.deblocking = 1; // no deblocking filter (less CPU usage)
+			video.smoothing = false;
 			
 			// Create the pixel feed that draws data from the video.
 			pixelFeed_ = new PixelFeed(video);
 			
 			// Create and configure the AR viewport.
 			arViewport_ = new ARViewport(stage3D_, pixelFeed_);
-			arViewport_.showProfilingDiagram = true;
 			arViewport_.mirrored = true;
 			
 			// Add the AR viewport to the 2D scene.
@@ -131,6 +189,9 @@ package
 			// Listen for and request the 3D stage's graphics context.
 			stage3D_.addEventListener(Event.CONTEXT3D_CREATE, onContextCreate);
 			stage3D_.requestContext3D();
+			
+			// Listen for keystrokes.
+			stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
 		}
 		
 		private function onContextCreate(event:Event):void
@@ -147,6 +208,12 @@ package
 				"apple.3ds",
 				"chalice.3ds"
 			);
+			
+			// Listen for frame updates.
+			addEventListener(Event.ENTER_FRAME, onEnterFrame);
+			
+			// Initialize the time.
+			lastMilliseconds_ = getTimer();
 		}
 		
 		
@@ -212,7 +279,6 @@ package
 			flareBarcodeFeatureSet.numBCHs = 2;
 			flareBarcodeFeatureSet.numFrames = 2;
 			// TODO: Template and data matrix markers.
-			//flareBarcodeFeatureSet.numDataMatrices = 2;
 			
 			// Create the barcode tracker.
 			flareBarcodeTracker_ = new FlareBarcodeTracker(this, pixelFeed_, arViewport_.scene3D, flareBarcodeFeatureSet);
@@ -231,22 +297,32 @@ package
 			// Add either an apple or a chalice to each marker pool.
 			for (var i:uint = 0; i < markerPools.length; i++)
 			{
+				var marker:Object3D;
 				if (i % 2 == 0)
 				{
-					markerPools[i].markers.push(applePrefab_.newObject3D());
+					marker = applePrefab_.newObject3D();
 				}
 				else
 				{
-					markerPools[i].markers.push(chalicePrefab_.newObject3D());
+					marker = chalicePrefab_.newObject3D();
 				}
+				marker.addEventListener(MarkerEvent.LOST, onMarkerLost);
+				markerPools[i].markers.push(marker);
 			}
 			
 			if (tracker == flareNaturalFeatureTracker_)
 			{
-				// Set up virtual buttons.
-				flareNaturalFeatureTracker_.addVirtualButton(0, 420,  70, 460, 110); // Vienna on the Austria map
-				flareNaturalFeatureTracker_.addVirtualButton(2, 110, 150, 150, 190); // left face of the Graz clock tower
-				flareNaturalFeatureTracker_.addVirtualButton(2, 165, 140, 210, 200); // right face of the Graz clock tower
+				// Set up a 48x48 pixel virtual button in the center of each
+				// physical marker.
+				
+				// The Austria physical marker is 480x256.
+				flareNaturalFeatureTracker_.addVirtualButton(0, 216, 104, 264, 152, 0.7, 0.8, 0.25);
+				
+				// The Vienna physical marker is 480x288.
+				flareNaturalFeatureTracker_.addVirtualButton(1, 216, 120, 264, 168, 0.7, 0.8, 0.25);
+				
+				// The Graz physical marker is 336x480.
+				flareNaturalFeatureTracker_.addVirtualButton(2, 144, 216, 192, 264, 0.7, 0.8, 0.25);
 			}
 		}
 		
@@ -269,7 +345,7 @@ package
 		)
 		:void
 		{
-			alert("The data matrix says:\n" + message);
+			// TODO
 		}
 		
 		public function onVirtualButtonEvent
@@ -291,27 +367,62 @@ package
 			
 			// The virtual button was pressed.
 			
-			if (markerID == 0)
+			// Get the marker corresponding to the virtual button.
+			var marker:Object3D = tracker.markerPools[markerID].markers[0];
+			
+			var i:int = rotatingMarkers_.indexOf(marker);
+			if (i == -1)
 			{
-				alert("You hid Vienna on the map of Austria.");
+				// The marker was not rotating.
+				
+				// Start rotating the marker.
+				rotatingMarkers_.push(marker);
 			}
-			else // markerID == 2
+			else
 			{
-				if (buttonID == 0)
-				{
-					alert("You hid the left face of the Graz clock tower.");
-				}
-				else // buttonID == 1
-				{
-					alert("You hid the right face of the Graz clock tower.");
-				}
+				// The marker was rotating.
+				
+				// Stop rotating the marker.
+				rotatingMarkers_.splice(i, 1);
 			}
 		}
 		
 		
-		private static function alert(message:String):void
+		private function onMarkerLost(event:MarkerEvent):void
 		{
-			ExternalInterface.call("alert", message);
+			var marker:Object3D = event.target as Object3D;
+			
+			var i:int = rotatingMarkers_.indexOf(marker);
+			if (i != -1)
+			{
+				// The marker was rotating.
+				
+				// Stop rotating the marker.
+				rotatingMarkers_.splice(i, 1);
+			}
+		}
+		
+		private function onEnterFrame(event:Event):void
+		{
+			// Update the time.
+			var milliseconds:int = getTimer();
+			var deltaMilliseconds:int = milliseconds - lastMilliseconds_;
+			lastMilliseconds_ = milliseconds;
+			
+			for each (var marker:Object3D in rotatingMarkers_)
+			{
+				// Rotate the marker at 45 degrees per second.
+				marker.getChildAt(0).rotationZ += deltaMilliseconds * 0.00025 * Math.PI;
+			}
+		}
+		
+		private function onKeyUp(event:KeyboardEvent):void
+		{
+			if (event.keyCode == 32) // spacebar
+			{
+				// Show or hide the Alternativa3D profiling diagram.
+				arViewport_.showProfilingDiagram = !arViewport_.showProfilingDiagram;
+			}
 		}
 	}
 }

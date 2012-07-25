@@ -35,6 +35,7 @@ package nummist.illusion.core
 	 * @see Loader
 	 * 
 	 * @author Joseph Howse
+	 * 
 	 * @flowerModelElementId _71nd4KnjEeG8rNJMqBg6NQ
 	 */
 	public interface ILoaderDelegate
@@ -42,6 +43,7 @@ package nummist.illusion.core
 		/**
 		 * Handles the specified error type, which arose when the specified
 		 * Loader object tried to load the specified file.
+		 * 
 		 * @flowerModelElementId _73iJcKnjEeG8rNJMqBg6NQ
 		 */
 		 function onLoadError(loader:Loader, filename:String, errorEventType:String):void;
@@ -49,6 +51,7 @@ package nummist.illusion.core
 		/**
 		 * Handles the specified data, which was loaded from the specified file
 		 * by the specified Loader object.
+		 * 
 		 * @flowerModelElementId _74hn86njEeG8rNJMqBg6NQ
 		 */
 		 function onLoadComplete(loader:Loader, filename:String, data:*):void;

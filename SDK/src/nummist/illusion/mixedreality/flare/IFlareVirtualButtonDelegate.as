@@ -31,6 +31,7 @@ package nummist.illusion.mixedreality.flare
 	 * for the sake of handling virtual button events.
 	 * 
 	 * @see FlareNaturalFeatureTracker
+	 * 
 	 * @flowerModelElementId _8HG2gKnjEeG8rNJMqBg6NQ
 	 */
 	public interface IFlareVirtualButtonDelegate
@@ -52,10 +53,15 @@ package nummist.illusion.mixedreality.flare
 		 * 
 		 * @param press A value of <code>true</code> means the button has been
 		 * pressed. False means it has been released.
+		 * 
 		 * @flowerModelElementId _8HHdkanjEeG8rNJMqBg6NQ
 		 */
-		 function onVirtualButtonEvent
-		(tracker:FlareNaturalFeatureTracker, markerID:uint, buttonID:uint, press:Boolean
+		function onVirtualButtonEvent
+		(
+			tracker:FlareNaturalFeatureTracker,
+			markerID:uint,
+			buttonID:uint,
+			press:Boolean
 		)
 		:void;
 	}

@@ -51,6 +51,7 @@ package nummist.illusion.mixedreality.flare
 	 * @see AbstractTracker
 	 * 
 	 * @author Joseph Howse
+	 * 
 	 * @flowerModelElementId _8F9nAKnjEeG8rNJMqBg6NQ
 	 */
 	public class FlareNaturalFeatureTracker extends AbstractTracker

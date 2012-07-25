@@ -61,6 +61,7 @@ package nummist.illusion.graphics.models
 	 * @see IExternalModelPrefabLoaderDelegate
 	 * 
 	 * @author Joseph Howse
+	 * 
 	 * @flowerModelElementId _8CqbYKnjEeG8rNJMqBg6NQ
 	 */
 	public class ExternalModelPrefabLoader implements ILoaderDelegate
@@ -81,10 +82,13 @@ package nummist.illusion.graphics.models
 		 * be interpreted relative to it. If the base path is not already
 		 * absolute and the delegate is a DisplayObject instance, the base path
 		 * is interpreted relative to the loader URL of the delegate's root.
+		 * 
 		 * @flowerModelElementId _8CtesanjEeG8rNJMqBg6NQ
 		 */
 		public function ExternalModelPrefabLoader
-		(delegate:IExternalModelPrefabLoaderDelegate, basePath:String
+		(
+			delegate:IExternalModelPrefabLoaderDelegate,
+			basePath:String
 		)
 		{
 			var displayObject:DisplayObject = delegate as DisplayObject;
@@ -211,6 +215,7 @@ package nummist.illusion.graphics.models
 		/**
 		 * Part of the ILoaderDelegate implementation. Do not invoke this
 		 * method; it is intended for use by an internal Loader object only.
+		 * 
 		 * @flowerModelElementId _8CxwIKnjEeG8rNJMqBg6NQ
 		 */
 		public function onLoadError(loader:Loader, filename:String, errorEventType:String):void
@@ -222,6 +227,7 @@ package nummist.illusion.graphics.models
 		/**
 		 * Part of the ILoaderDelegate implementation. Do not invoke this
 		 * method; it is intended for use by an internal Loader object only.
+		 * 
 		 * @flowerModelElementId _8Cy-Q6njEeG8rNJMqBg6NQ
 		 */
 		public function onLoadComplete(loader:Loader, filename:String, data:*):void
