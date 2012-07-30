@@ -30,25 +30,31 @@ package nummist.illusion.mixedreality.flare
 	
 	import cmodule.libFlareTracker.CLibInit;
 	
+	import flash.display.Stage;
 	import flash.utils.ByteArray;
 	
 	import nummist.illusion.core.ILoaderDelegate;
 	import nummist.illusion.core.Loader;
 	import nummist.illusion.core.Logger;
 	import nummist.illusion.core.StringUtils;
+	import nummist.illusion.mixedreality.AbstractPixelFeed;
 	import nummist.illusion.mixedreality.AbstractTracker;
 	import nummist.illusion.mixedreality.ITrackerDelegate;
 	import nummist.illusion.mixedreality.MarkerEvent;
 	import nummist.illusion.mixedreality.MarkerPool;
 	import nummist.illusion.mixedreality.MarkerPoolIterator;
-	import nummist.illusion.mixedreality.PixelFeed;
 	
 	
 	/**
 	 * An AbstractTracker subclass that wraps flare&#42;tracker, the barcode
 	 * tracker from Imagination Computer Services GmbH.
+	 * <br /><br />
+	 * To avoid memory leaks, invoke the <code>stop()</code> method once this
+	 * object is no longer in use.
 	 * 
 	 * @see AbstractTracker
+	 * @see FlareBarcodeFeatureSet
+	 * @see IFlareDataMatrixDelegate
 	 * 
 	 * @author Joseph Howse
 	 * 
@@ -89,13 +95,34 @@ package nummist.illusion.mixedreality.flare
 		
 		
 		/**
-		 * TODO: Comments.
+		 * Creates a FlareBarcodeTracker object.
+		 * 
+		 * @param delegate A delegate that is provided the opportunity to
+		 * populate the MarkerPool objects when they are created and when they
+		 * are asked for more markers than they have. Additionally, if the
+		 * delegate implements the IFlareDataMatrixDelegate interface, it is
+		 * provided the opportunity to handle the message decoded from any
+		 * data matrix barcode when the barcode is newly found.
+		 * 
+		 * @param pixelFeed The supplier of pixel data and projection data.
+		 * 
+		 * @param stage The stage.
+		 * 
+		 * @param scene3D The 3D node wherein markers are placed.
+		 * 
+		 * @param featureSet The set of barcode feature definitions.
 		 * 
 		 * @param autoStart A value of <code>true</code> means this object will
-		 * <code>start()</code> immediately if the PixelFeed object's source is
-		 * onstage, and automatically whenever the PixelFeed object's source is
-		 * added to the stage. Regardless, this object will <code>stop()</code>
-		 * whenever the PixelFeed object's source is removed from the stage.
+		 * <code>start()</code> immediately.
+		 * 
+		 * @param dataPath The path to the folder containing the
+		 * flare&#42;tracker license and image files for any template markers.
+		 * If this argument is omitted or <code>null</code>, it defaults to
+		 * <code>"data/"</code>.
+		 * 
+		 * @param licenseFilename The path to the flare&#42;nft license file,
+		 * relative to dataPath. If this argument is omitted or
+		 * <code>null</code>, it defaults to <code>"flareTracker.lic"</code>.
 		 * 
 		 * @throws ArgumentError if <code>delegate</code>,
 		 * <code>pixelFeed</code>, <code>scene3D</code>, or
@@ -106,7 +133,8 @@ package nummist.illusion.mixedreality.flare
 		public function FlareBarcodeTracker
 		(
 			delegate:ITrackerDelegate,
-			pixelFeed:PixelFeed,
+			pixelFeed:AbstractPixelFeed,
+			stage:Stage,
 			scene3D:Object3D,
 			featureSet:FlareBarcodeFeatureSet,
 			autoStart:Boolean=true,
@@ -121,7 +149,7 @@ package nummist.illusion.mixedreality.flare
 			
 			if (featureSet_)
 			{
-				super(delegate, pixelFeed, scene3D, autoStart);
+				super(delegate, pixelFeed, stage, scene3D, autoStart);
 			}
 			else
 			{
@@ -240,7 +268,7 @@ package nummist.illusion.mixedreality.flare
 			loader_ = new Loader
 			(
 				this,
-				StringUtils.absolutePath(dataPath_, stage)
+				StringUtils.absolutePath(dataPath_, stage_)
 			);
 			loader_.loadBinary(licenseFilename_);
 		}
@@ -266,10 +294,7 @@ package nummist.illusion.mixedreality.flare
 			
 			// Release the marker pools.
 			markerPools.fixed = false;
-			while (markerPools.length > 0)
-			{
-				markerPools.pop();
-			}
+			markerPools.splice(0, markerPools.length);
 			markerPools.fixed = true;
 		}
 		
@@ -388,8 +413,10 @@ package nummist.illusion.mixedreality.flare
 		
 		
 		/**
-		 * Part of the ILoaderDelegate implementation. Do not invoke this
-		 * method; it is intended for use by an internal Loader object only.
+		 * Part of the ILoaderDelegate implementation.
+		 * <br /><br />
+		 * Do not invoke this method; it is intended for use by an internal
+		 * Loader object only.
 		 * 
 		 * @throws Error always.
 		 */
@@ -406,8 +433,10 @@ package nummist.illusion.mixedreality.flare
 		}
 		
 		/**
-		 * Part of the ILoaderDelegate implementation. Do not invoke this
-		 * method; it is intended for use by an internal Loader object only.
+		 * Part of the ILoaderDelegate implementation.
+		 * <br /><br />
+		 * Do not invoke this method; it is intended for use by an internal
+		 * Loader object only.
 		 * 
 		 * @throws Error if flare*tracker finds an invalid license or fails to
 		 * initialize.
@@ -432,7 +461,7 @@ package nummist.illusion.mixedreality.flare
 				// Initialize the native tracker.
 				if (!nativeTracker_.initTracker
 				(
-					stage,
+					stage_,
 					pixelFeed_.width,
 					pixelFeed_.height,
 					"data/cam.ini"

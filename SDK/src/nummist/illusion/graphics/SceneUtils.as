@@ -24,23 +24,68 @@ josephhowse@nummist.com
 */
 
 
-package nummist.illusion.graphics.lights
+package nummist.illusion.graphics
 {
 	import alternativa.engine3d.core.Object3D;
 	import alternativa.engine3d.lights.DirectionalLight;
+	import alternativa.engine3d.objects.Mesh;
 	
 	import flash.geom.Vector3D;
 	
 	
 	/**
-	 * Static utility functions for creating lighting setups.
+	 * Static utility functions for creating, searching, or manipulating 3D
+	 * scene nodes.
 	 * 
 	 * @author Joseph Howse
 	 * 
 	 * @flowerModelElementId _JtkjMLQLEeGR3Y9FTHwn1w
 	 */
-	public class LightingUtils
+	public class SceneUtils
 	{
+		/**
+		 * A value of <code>true</code> means that at least one node in the
+		 * specified scene (or branch or leaf) is an instance of the specified
+		 * class.
+		 * 
+		 * @param scene The scene (or branch or leaf).
+		 * 
+		 * @param clazz The class.
+		 * 
+		 * @throws ArgumentError if either argument is <code>null</code>.
+		 */
+		public static function sceneContainsClass
+		(
+			scene:Object3D,
+			clazz:Class
+		)
+		:Boolean
+		{
+			if (!scene)
+			{
+				throw new ArgumentError("scene must be non-null");
+			}
+			
+			if (!clazz)
+			{
+				throw new ArgumentError("clazz must be non-null");
+			}
+			
+			if (scene is clazz)
+			{
+				return true;
+			}
+			for (var i:uint; i < scene.numChildren; i++)
+			{
+				if (sceneContainsClass(scene.getChildAt(i), clazz))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		
 		/**
 		 * Creates an Object3D instance with three DirectionalLight instances
 		 * as children. The lights are arranged in a conventional three-point

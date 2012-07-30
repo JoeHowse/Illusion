@@ -87,10 +87,11 @@ package nummist.illusion.graphics.models
 		
 		/**
 		 * Creates an ExternalModelPrefab object with the specified 3D graphics
-		 * context, main file, and child Object3D instances. Do not invoke this
-		 * constructor; instead, get ExternalModelPrefab instances by
-		 * implementing IExternalModelPrefabLoader and creating one or more
-		 * ExternalModelPrefab instances.
+		 * context, main file, and child Object3D instances.
+		 * <br /><br />
+		 * Do not invoke this constructor; instead, get ExternalModelPrefab
+		 * instances by implementing IExternalModelPrefabLoader and creating
+		 * one or more ExternalModelPrefab instances.
 		 * 
 		 * @param basePath The base path of the model's main file and textures.
 		 * 

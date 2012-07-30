@@ -71,9 +71,11 @@ package nummist.illusion.mixedreality
 		
 		/**
 		 * Creates a MarkerPool object with an empty Vector.<Object3D>
-		 * instance. Do not invoke this constructor; instead, get MarkerPool
-		 * instances by implementing ITrackerDelegate and creating one or
-		 * more AbstractTracker subclass instances.
+		 * instance.
+		 * <br /><br />
+		 * Do not invoke this constructor; instead, get MarkerPool instances by
+		 * implementing ITrackerDelegate and creating one or more
+		 * AbstractTracker subclass instances.
 		 */
 		public function MarkerPool() {}
 		

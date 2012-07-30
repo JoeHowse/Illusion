@@ -51,7 +51,7 @@ package nummist.illusion.core
 		 * @return An absolute path, or <code>null</code> if the specified path
 		 * is <code>null</code>.
 		 * 
-		 * @throws ArgumentError if displayObject is null.
+		 * @throws ArgumentError if displayObject is <code>null</code>.
 		 */
 		public static function absolutePath
 		(

@@ -39,6 +39,7 @@ package
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.media.Camera;
+	import flash.media.StageVideo;
 	import flash.media.Video;
 	import flash.system.Capabilities;
 	import flash.text.TextField;
@@ -47,17 +48,22 @@ package
 	
 	import flashx.textLayout.formats.TextAlign;
 	
-	import nummist.illusion.graphics.lights.LightingUtils;
+	import nummist.illusion.graphics.SceneUtils;
 	import nummist.illusion.graphics.materials.DisplayObjectMaterial;
 	import nummist.illusion.graphics.models.ExternalModelPrefab;
 	import nummist.illusion.graphics.models.ExternalModelPrefabLoader;
 	import nummist.illusion.graphics.models.IExternalModelPrefabLoaderDelegate;
-	import nummist.illusion.mixedreality.ARViewport;
+	import nummist.illusion.logic.CameraSeesActivity;
+	import nummist.illusion.mixedreality.ARViewportUsingStage;
+	import nummist.illusion.mixedreality.ARViewportUsingStageVideo;
+	import nummist.illusion.mixedreality.AbstractARViewport;
+	import nummist.illusion.mixedreality.AbstractPixelFeed;
 	import nummist.illusion.mixedreality.AbstractTracker;
 	import nummist.illusion.mixedreality.ITrackerDelegate;
 	import nummist.illusion.mixedreality.MarkerEvent;
 	import nummist.illusion.mixedreality.MarkerPool;
-	import nummist.illusion.mixedreality.PixelFeed;
+	import nummist.illusion.mixedreality.PixelFeedFromCamera;
+	import nummist.illusion.mixedreality.PixelFeedFromDisplayObject;
 	import nummist.illusion.mixedreality.flare.FlareBarcodeFeatureSet;
 	import nummist.illusion.mixedreality.flare.FlareBarcodeTracker;
 	import nummist.illusion.mixedreality.flare.FlareNaturalFeatureTracker;
@@ -76,10 +82,11 @@ package
 		IFlareVirtualButtonDelegate
 	{
 		private const PROFILE_WITH_THE_MINER:Boolean = false;
+		private const ACCELERATE_WITH_STAGE_VIDEO:Boolean = true;
 		
 		private var stage3D_:Stage3D;
-		private var pixelFeed_:PixelFeed;
-		private var arViewport_:ARViewport;
+		private var pixelFeed_:AbstractPixelFeed;
+		private var arViewport_:AbstractARViewport;
 		private var flareBarcodeTracker_:FlareBarcodeTracker;
 		private var flareNaturalFeatureTracker_:FlareNaturalFeatureTracker;
 		private var applePrefab_:ExternalModelPrefab;
@@ -108,6 +115,10 @@ package
 			{
 				removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			}
+			
+			// Configure the 2D stage.
+			stage.align = StageAlign.TOP_LEFT;
+			stage.scaleMode = StageScaleMode.NO_SCALE;
 			
 			// Create the video camera.
 			var videoCamera:Camera = Camera.getCamera();
@@ -141,6 +152,9 @@ package
 				return;
 			}
 			
+			// Get the 3D stage.
+			stage3D_ = stage.stage3Ds[0];
+			
 			// Configure the video camera.
 			videoCamera.setMode(640, 480, 30); // 640x480 @ 30 FPS
 			videoCamera.setQuality(0, 100); // uncompressed (less CPU usage)
@@ -156,26 +170,41 @@ package
 				stage.mouseChildren = false;
 			}
 			
-			// Configure the 2D stage.
-			stage.align = StageAlign.TOP_LEFT;
-			stage.scaleMode = StageScaleMode.NO_SCALE;
-			
-			// Get the 3D stage.
-			stage3D_ = stage.stage3Ds[0];
-			
-			// Create and configure the video.
-			var video:Video = new Video(videoCamera.width, videoCamera.height);
-			video.attachCamera(videoCamera);
-			video.opaqueBackground = 0x000000; // no transparency
-			video.deblocking = 1; // no deblocking filter (less CPU usage)
-			video.smoothing = false;
-			
-			// Create the pixel feed that draws data from the video.
-			pixelFeed_ = new PixelFeed(video);
-			
-			// Create and configure the AR viewport.
-			arViewport_ = new ARViewport(stage3D_, pixelFeed_);
-			arViewport_.mirrored = true;
+			if (ACCELERATE_WITH_STAGE_VIDEO && stage.stageVideos.length > 0)
+			{
+				var stageVideo:StageVideo = stage.stageVideos[0];
+				
+				// Create the pixel feed that draws data from the camera.
+				pixelFeed_ = new PixelFeedFromCamera(videoCamera);
+				
+				// Create the AR viewport.
+				arViewport_ = new ARViewportUsingStageVideo
+				(
+					stageVideo,
+					stage3D_,
+					pixelFeed_ as PixelFeedFromCamera
+				);
+			}
+			else
+			{
+				// Create and configure the video.
+				var video:Video = new Video(videoCamera.width, videoCamera.height);
+				video.attachCamera(videoCamera);
+				video.opaqueBackground = 0x000000; // no transparency
+				video.deblocking = 1; // no deblocking filter (less CPU usage)
+				video.smoothing = false;
+				
+				// Create the pixel feed that draws data from the video.
+				pixelFeed_ = new PixelFeedFromDisplayObject(video);
+				
+				// Create and configure the AR viewport.
+				arViewport_ = new ARViewportUsingStage
+				(
+					stage3D_,
+					pixelFeed_ as PixelFeedFromDisplayObject
+				);
+				(arViewport_ as ARViewportUsingStage).mirrored = true;
+			}
 			
 			// Add the AR viewport to the 2D scene.
 			addChild(arViewport_);
@@ -184,7 +213,7 @@ package
 			var scene3D:Object3D = arViewport_.scene3D;
 			
 			// Add lights to the 3D scene.
-			scene3D.addChild(LightingUtils.newThreePointLighting());
+			scene3D.addChild(SceneUtils.newThreePointLighting());
 			
 			// Listen for and request the 3D stage's graphics context.
 			stage3D_.addEventListener(Event.CONTEXT3D_CREATE, onContextCreate);
@@ -281,10 +310,10 @@ package
 			// TODO: Template and data matrix markers.
 			
 			// Create the barcode tracker.
-			flareBarcodeTracker_ = new FlareBarcodeTracker(this, pixelFeed_, arViewport_.scene3D, flareBarcodeFeatureSet);
+			flareBarcodeTracker_ = new FlareBarcodeTracker(this, pixelFeed_, stage, arViewport_.scene3D, flareBarcodeFeatureSet);
 			
 			// Create the natural feature tracker.
-			flareNaturalFeatureTracker_ = new FlareNaturalFeatureTracker(this, pixelFeed_, arViewport_.scene3D);
+			flareNaturalFeatureTracker_ = new FlareNaturalFeatureTracker(this, pixelFeed_, stage, arViewport_.scene3D);
 		}
 		
 		public function onTrackerStarted

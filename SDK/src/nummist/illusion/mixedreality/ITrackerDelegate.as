@@ -67,8 +67,8 @@ package nummist.illusion.mixedreality
 		 * 
 		 * @param tracker The AbstractTracker subclass instnace.
 		 * 
-		 * @param markerPoolIndex The MarkerPool object's index, as defined by the
-		 * AbstractTracker subclass instance.
+		 * @param markerPoolIndex The MarkerPool object's index, as defined by
+		 * the AbstractTracker subclass instance.
 		 * 
 		 * @param markerPool The MarkerPool object.
 		 * 

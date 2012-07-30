@@ -3,7 +3,7 @@
   <includeClasses>
     <classEntry path="nummist.illusion.mixedreality.MarkerPool"/>
     <classEntry path="nummist.illusion.mixedreality.AbstractTracker"/>
-    <classEntry path="nummist.illusion.mixedreality.ARViewport"/>
+    <classEntry path="nummist.illusion.mixedreality.ARViewportUsingStage"/>
     <classEntry path="nummist.illusion.mixedreality.flare.FlareUtils"/>
     <classEntry path="nummist.illusion.core.Loader"/>
     <classEntry path="nummist.illusion.core.ILoaderDelegate"/>
@@ -20,9 +20,13 @@
     <classEntry path="nummist.illusion.mixedreality.flare.IFlareVirtualButtonDelegate"/>
     <classEntry path="nummist.illusion.mixedreality.flare.IFlareDataMatrixDelegate"/>
     <classEntry path="nummist.illusion.mixedreality.flare.FlareBarcodeFeatureSet"/>
-    <classEntry path="nummist.illusion.graphics.lights.LightingUtils"/>
     <classEntry path="nummist.illusion.logic.ILogicalStatement"/>
     <classEntry path="nummist.illusion.logic.CameraSeesActivity"/>
+    <classEntry path="nummist.illusion.mixedreality.ARViewportUsingStageVideo"/>
+    <classEntry path="nummist.illusion.mixedreality.AbstractPixelFeed"/>
+    <classEntry path="nummist.illusion.mixedreality.PixelFeedFromCamera"/>
+    <classEntry path="nummist.illusion.mixedreality.IPixelFeedSubscriber"/>
+    <classEntry path="nummist.illusion.mixedreality.AbstractARViewport"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

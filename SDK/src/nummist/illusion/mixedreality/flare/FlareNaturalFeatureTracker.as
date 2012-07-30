@@ -30,25 +30,30 @@ package nummist.illusion.mixedreality.flare
 	
 	import cmodule.libFlareNFT.CLibInit;
 	
+	import flash.display.Stage;
 	import flash.utils.ByteArray;
 	
 	import nummist.illusion.core.ILoaderDelegate;
 	import nummist.illusion.core.Loader;
 	import nummist.illusion.core.Logger;
 	import nummist.illusion.core.StringUtils;
+	import nummist.illusion.mixedreality.AbstractPixelFeed;
 	import nummist.illusion.mixedreality.AbstractTracker;
 	import nummist.illusion.mixedreality.ITrackerDelegate;
 	import nummist.illusion.mixedreality.MarkerEvent;
 	import nummist.illusion.mixedreality.MarkerPool;
 	import nummist.illusion.mixedreality.MarkerPoolIterator;
-	import nummist.illusion.mixedreality.PixelFeed;
 	
 	
 	/**
 	 * An AbstractTracker subclass that wraps flare&#42;nft, the natural
 	 * feature tracker from Imagination Computer Services GmbH.
+	 * <br /><br />
+	 * To avoid memory leaks, invoke the <code>stop()</code> method once this
+	 * object is no longer in use.
 	 * 
 	 * @see AbstractTracker
+	 * @see IFlareVirtualButtonDelegate
 	 * 
 	 * @author Joseph Howse
 	 * 
@@ -80,15 +85,14 @@ package nummist.illusion.mixedreality.flare
 		 * provided the opportunity to handle virtual button presses and
 		 * releases.
 		 * 
-		 * @param pixelFeed The supplier of bitmap and projection data.
+		 * @param pixelFeed The supplier of pixel data and projection data.
+		 * 
+		 * @param stage The stage.
 		 * 
 		 * @param scene3D The 3D node wherein markers are placed.
 		 * 
 		 * @param autoStart A value of <code>true</code> means this object will
-		 * <code>start()</code> immediately if the PixelFeed object's source is
-		 * onstage, and automatically whenever the PixelFeed object's source is
-		 * added to the stage. Regardless, this object will <code>stop()</code>
-		 * whenever the PixelFeed object's source is removed from the stage.
+		 * <code>start()</code> immediately.
 		 * 
 		 * @param multiTargets False means that at most one marker, from all
 		 * pools, can be considered found at any given time. This limitation
@@ -116,7 +120,8 @@ package nummist.illusion.mixedreality.flare
 		public function FlareNaturalFeatureTracker
 		(
 			delegate:ITrackerDelegate,
-			pixelFeed:PixelFeed,
+			pixelFeed:AbstractPixelFeed,
+			stage:Stage,
 			scene3D:Object3D,
 			autoStart:Boolean = true,
 			multiTargets:Boolean = true,
@@ -131,7 +136,7 @@ package nummist.illusion.mixedreality.flare
 			licenseFilename_ = (licenseFilename ? licenseFilename : "flareNFT.lic");
 			featureSetFilename_ = (featureSetFilename ? featureSetFilename : "featureSet.ini");
 			
-			super(delegate, pixelFeed, scene3D, autoStart);
+			super(delegate, pixelFeed, stage, scene3D, autoStart);
 		}
 		
 		
@@ -227,7 +232,7 @@ package nummist.illusion.mixedreality.flare
 				throw new Error("the delegate must implement IFlareVirtualButtonDelegate");
 			}
 			
-			var delayFrames:uint = Math.max(1, delay * stage.frameRate);
+			var delayFrames:uint = Math.max(1, delay * stage_.frameRate);
 			var minCoverageTimeFrames:uint = Math.max(1, minCoverageProportionTime * delayFrames);
 			
 			// Register the virtual button with the native tracker.
@@ -254,7 +259,7 @@ package nummist.illusion.mixedreality.flare
 			loader_ = new Loader
 			(
 				this,
-				StringUtils.absolutePath(dataPath_, stage)
+				StringUtils.absolutePath(dataPath_, stage_)
 			);
 			loader_.loadBinary(licenseFilename_);
 		}
@@ -280,10 +285,7 @@ package nummist.illusion.mixedreality.flare
 			
 			// Release the marker pools.
 			markerPools.fixed = false;
-			while (markerPools.length > 0)
-			{
-				markerPools.pop();
-			}
+			markerPools.splice(0, markerPools.length);
 			markerPools.fixed = true;
 		}
 		
@@ -358,8 +360,10 @@ package nummist.illusion.mixedreality.flare
 		
 		
 		/**
-		 * Part of the ILoaderDelegate implementation. Do not invoke this
-		 * method; it is intended for use by an internal Loader object only.
+		 * Part of the ILoaderDelegate implementation.
+		 * <br /><br />
+		 * Do not invoke this method; it is intended for use by an internal
+		 * Loader object only.
 		 * 
 		 * @throws Error always.
 		 */
@@ -376,8 +380,10 @@ package nummist.illusion.mixedreality.flare
 		}
 		
 		/**
-		 * Part of the ILoaderDelegate implementation. Do not invoke this
-		 * method; it is intended for use by an internal Loader object only.
+		 * Part of the ILoaderDelegate implementation.
+		 * <br /><br />
+		 * Do not invoke this method; it is intended for use by an internal
+		 * Loader object only.
 		 * 
 		 * @throws Error if flare*nft finds an invalid license file, fails to
 		 * initialize, or fails to load the feature set.
@@ -499,11 +505,11 @@ package nummist.illusion.mixedreality.flare
 			// Initialize the native tracker.
 			if (!nativeTracker_.initTracker
 			(
-				stage,
+				stage_,
 				pixelFeed_.width,
 				pixelFeed_.height,
 				multiTargets_,
-				stage.frameRate, // value seems not to matter
+				stage_.frameRate, // value seems not to matter
 				"data/cam.ini"
 			))
 			{

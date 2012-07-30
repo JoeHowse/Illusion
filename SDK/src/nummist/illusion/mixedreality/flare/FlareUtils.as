@@ -31,7 +31,7 @@ package nummist.illusion.mixedreality.flare
 	import flash.geom.Rectangle;
 	import flash.utils.ByteArray;
 	
-	import nummist.illusion.mixedreality.PixelFeed;
+	import nummist.illusion.mixedreality.AbstractPixelFeed;
 	
 
 	internal class FlareUtils
@@ -39,7 +39,7 @@ package nummist.illusion.mixedreality.flare
 		private static var matrixRawVector:Vector.<Number> = new Vector.<Number>(16);
 		
 		
-		internal static function rawCamConfig(pixelFeed:PixelFeed):ByteArray
+		internal static function rawCamConfig(pixelFeed:AbstractPixelFeed):ByteArray
 		{
 			var width:uint = pixelFeed.width;
 			var height:uint = pixelFeed.height;

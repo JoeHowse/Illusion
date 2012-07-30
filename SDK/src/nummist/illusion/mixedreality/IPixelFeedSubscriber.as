@@ -24,36 +24,29 @@ josephhowse@nummist.com
 */
 
 
-package nummist.illusion.mixedreality.flare
+package nummist.illusion.mixedreality
 {
 	/**
-	 * A delegate providing a callback to a FlareBarcodeTracker object for the
-	 * sake of handling the message decoded from any data matrix barcode when
-	 * the barcode is newly found.
+	 * A subscriber providing a callback to a one or more AbstactPixelFeed
+	 * subclass instances.
 	 * 
-	 * @flowerModelElementId _8GvqIKnjEeG8rNJMqBg6NQ
+	 * @see AbstractPixelFeed
+	 * 
+	 * @author Joseph Howse
+	 * 
+	 * @flowerModelElementId _hyRPoNnZEeG6Ia5yiOlRVA
 	 */
-	public interface IFlareDataMatrixDelegate
+	public interface IPixelFeedSubscriber
 	{
 		/**
-		 * Handles a message decoded from a data matrix barcode by the specifed
-		 * FlareBarcodeTracker object when the barcode is newly found.
+		 * Handles the event that updated pixel data is availble from the
+		 * specified feed. Typically, this callback will fetch a handle to the
+		 * pixel data from <code>pixelFeed.pixels</code>.
 		 * 
-		 * @param tracker The FlareBarcodeTracker object.
+		 * @param pixelFeed The pixel feed.
 		 * 
-		 * @param markerID The MarkerPool object's index, as defined by the
-		 * FlareNaturalFeatureTracker object.
-		 * 
-		 * @param message The message as plain text.
-		 * 
-		 * @flowerModelElementId _8GwRManjEeG8rNJMqBg6NQ
+		 * @see AbstractPixelFeed.pixels
 		 */
-		function onDataMatrixMessage
-		(
-			tracker:FlareBarcodeTracker,
-			markerID:uint,
-			message:String
-		)
-		:void;
+		function onPixelFeedUpdated(pixelFeed:AbstractPixelFeed):void;
 	}
 }

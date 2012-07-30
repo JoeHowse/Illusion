@@ -35,18 +35,22 @@ package nummist.illusion.mixedreality
 	
 	
 	/**
-	 * A consumer of pixel data and projection data, as produced by a PixelFeed
-	 * object, and a producer of MarkerPool objects that contain de-projected
-	 * representations of particular features in the pixel data.
+	 * A consumer of pixel data and projection data, as produced by an
+	 * AbstractPixelFeed subclass instance, and a producer of MarkerPool
+	 * objects that contain de-projected representations of particular
+	 * features in the pixel data.
+	 * <br /><br />
+	 * To avoid memory leaks, invoke the <code>stop()</code> method once this
+	 * object is no longer in use.
 	 * 
 	 * @see MarkerPool
-	 * @see PixelFeed
+	 * @see AbstractPixelFeed
 	 * 
 	 * @author Joseph Howse
 	 * 
 	 * @flowerModelElementId _8FGrY6njEeG8rNJMqBg6NQ
 	 */
-	public class AbstractTracker
+	public class AbstractTracker implements IPixelFeedSubscriber
 	{
 		/**
 		 * MarkerPool objects that each correspond to a particular marker ID
@@ -68,44 +72,39 @@ package nummist.illusion.mixedreality
 		 */
 		public const markerPools:Vector.<MarkerPool> = new Vector.<MarkerPool>();
 		
-		/**
-		 * A value of <code>true</code> means this object will
-		 * <code>start()</code> immediately if the PixelFeed object's source is
-		 * onstage, and automatically whenever the PixelFeed object's source is
-		 * added to the stage. Regardless, this object will <code>stop()</code>
-		 * whenever the PixelFeed object's source is removed from the stage.
-		 */
-		public var autoStart:Boolean;
 		
 		protected var delegate_:ITrackerDelegate;
-		protected var pixelFeed_:PixelFeed;
+		protected var pixelFeed_:AbstractPixelFeed;
+		protected var stage_:Stage;
 		protected var scene3D_:Object3D;
 		
 		
 		/**
-		 * Creates an AbstractTracker object. Do not invoke this constructor;
-		 * it is intended for use by subclasses only.
+		 * Creates an AbstractTracker object.
+		 * <br /><br />
+		 * Do not invoke this constructor; it is intended for use by subclasses
+		 * only.
 		 * 
 		 * @param delegate A delegate that is provided the opportunity to
 		 * populate the MarkerPool objects when they are created and when they
 		 * are asked for more markers than they have.
 		 * 
-		 * @param pixelFeed The supplier of bitmap and projection data.
+		 * @param pixelFeed The supplier of pixel data and projection data.
+		 * 
+		 * @param stage The stage.
 		 * 
 		 * @param scene3D The 3D node wherein markers are placed.
 		 * 
 		 * @param autoStart A value of <code>true</code> means this object will
-		 * <code>start()</code> immediately if the PixelFeed object's source is
-		 * onstage, and automatically whenever the PixelFeed object's source is
-		 * added to the stage. Regardless, this object will <code>stop()</code>
-		 * whenever the PixelFeed object's source is removed from the stage.
+		 * <code>start()</code> immediately.
 		 * 
-		 * @throws ArgumentError if any argument is null.
+		 * @throws ArgumentError if any argument is <code>null</code>.
 		 */
 		public function AbstractTracker
 		(
 			delegate:ITrackerDelegate,
-			pixelFeed:PixelFeed,
+			pixelFeed:AbstractPixelFeed,
+			stage:Stage,
 			scene3D:Object3D,
 			autoStart:Boolean = true
 		)
@@ -120,6 +119,11 @@ package nummist.illusion.mixedreality
 				throw new ArgumentError("pixelFeed must be non-null");
 			}
 			
+			if (!stage)
+			{
+				throw new ArgumentError("stage must be non-null");
+			}
+			
 			if (!scene3D)
 			{
 				throw new ArgumentError("scene3D must be non-null");
@@ -127,67 +131,47 @@ package nummist.illusion.mixedreality
 			
 			delegate_ = delegate;
 			pixelFeed_ = pixelFeed;
+			stage_ = stage;
 			scene3D_ = scene3D;
-			this.autoStart = autoStart;
 			
 			// Fix the number of marker pools.
 			markerPools.fixed = true;
 			
-			// Get the source and stage from the pixel feed.
-			var source:DisplayObject = pixelFeed_.source;
-			var stage:Stage = source.stage;
-			
-			// Once the source is onstage, evaluate whether to start the
-			// tracker.
-			if (stage)
+			if (autoStart)
 			{
-				onSourceAddedToStage();
-			}
-			else
-			{
-				source.addEventListener
-				(
-					Event.ADDED_TO_STAGE, // type
-					onSourceAddedToStage, // listener
-					false, // useCapture
-					0, // priority
-					true // useWeakReference
-				);
+				start();
 			}
 		}
 		
 		
 		/**
-		 * Start tracking features in the pixel data provided by the PixelFeed
-		 * object, and updating markers held by the MarkerPool objects.
+		 * Start tracking features in the pixel data provided by the 
+		 * AbstractPixelFeed subclass instance. Also start updating markers
+		 * held by the MarkerPool objects.
 		 */
 		public function start():void
 		{
-			// Update the tracker each time the source enters the frame.
-			pixelFeed_.source.addEventListener
-			(
-				Event.EXIT_FRAME, // type
-				onSourceExitFrame, // listener
-				false, // useCapture
-				0, // priority
-				true // useWeakReference
-			);
+			// Update the tracker each time the pixel feed is updated.
+			pixelFeed_.addSubscriber(this);
 		}
 		
 		/**
-		 * Stop tracking features in the pixel data provided by the PixelFeed
-		 * object, and updating markers held by the MarkerPool objects.
+		 * Stop tracking features in the pixel data provided by the
+		 * AbstractPixelFeed subclass instance. Also stop updating markers held
+		 * by the MarkerPool objects.
+		 * <br /><br />
+		 * Anytime later, to restart tracking and marker updates, invoke
+		 * <code>start()</code> again.
+		 * <br /><br />
+		 * Invoking <code>stop()</code> is necessary in order to ensure that
+		 * the tracker is garbage-collectible.
 		 */
 		public function stop():void
 		{
-			pixelFeed_.source.removeEventListener(Event.EXIT_FRAME, onSourceExitFrame);
+			// Stop updating the tracker each time the pixel feed is updated.
+			pixelFeed_.removeSubscriber(this);
 		}
 		
-		
-		protected function get stage():Stage
-		{
-			return pixelFeed_.source.stage;
-		}
 		
 		protected function updateTrackedMarkers
 		(
@@ -197,41 +181,15 @@ package nummist.illusion.mixedreality
 		:void {}
 		
 		
-		private function onSourceAddedToStage(event:Event = null):void
+		/**
+		 * Part of the IPixelFeedSubscriber implementation.
+		 * <br /><br />
+		 * Do not invoke this method; it is intended solely for use by the
+		 * AbstractPixelFeed subclass instance passed to this object's
+		 * constructor.
+		 */
+		public function onPixelFeedUpdated(pixelFeed:AbstractPixelFeed):void
 		{
-			var source:DisplayObject = pixelFeed_.source;
-			if (source.hasEventListener(Event.ADDED_TO_STAGE))
-			{
-				source.removeEventListener(Event.ADDED_TO_STAGE, onSourceAddedToStage);
-			}
-			
-			if (autoStart)
-			{
-				// Start the tracker.
-				start();
-			}
-			
-			// Stop the tracker once the source is offstage.
-			source.addEventListener
-			(
-				Event.REMOVED_FROM_STAGE, // type
-				onSourceRemovedFromStage, // listener
-				false, // useCapture
-				0, // priority
-				true // useWeakReference
-			);
-		}
-		
-		private function onSourceExitFrame(event:Event):void
-		{
-			if (!pixelFeed_.didRedraw)
-			{
-				// There is nothing new to see.
-				
-				// No-op.
-				return;
-			}
-			
 			// Get iterators for the marker pools.
 			var markerPoolIterators:Vector.<MarkerPoolIterator> = new Vector.<MarkerPoolIterator>();
 			for each (var markerPool:MarkerPool in markerPools)
@@ -244,26 +202,6 @@ package nummist.illusion.mixedreality
 			
 			// Update the untracked markers.
 			updateUntrackedMarkers(markerPoolIterators);
-		}
-		
-		private function onSourceRemovedFromStage(event:Event):void
-		{
-			var source:DisplayObject = pixelFeed_.source;
-			source.removeEventListener(Event.REMOVED_FROM_STAGE, onSourceRemovedFromStage);
-			
-			// Stop the tracker.
-			stop();
-			
-			// Once the source is onstage again, evaluate whether to restart
-			// the tracker.
-			source.addEventListener
-			(
-				Event.ADDED_TO_STAGE, // type
-				onSourceAddedToStage, // listener
-				false, // useCapture
-				0, // priority
-				true // useWeakReference
-			);
 		}
 		
 		private function updateUntrackedMarkers(markerPoolIterators:Vector.<MarkerPoolIterator>):void

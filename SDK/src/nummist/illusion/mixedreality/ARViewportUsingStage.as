@@ -27,49 +27,43 @@ josephhowse@nummist.com
 package nummist.illusion.mixedreality
 {
 	import alternativa.engine3d.core.Camera3D;
-	import alternativa.engine3d.core.Object3D;
 	import alternativa.engine3d.core.View;
-	import alternativa.engine3d.objects.Mesh;
 	
 	import flash.display.DisplayObject;
-	import flash.display.Sprite;
 	import flash.display.Stage3D;
 	import flash.events.Event;
 	import flash.geom.Matrix;
 	
 	
 	/**
-	 * A pairing of a 3D viewport and a 2D background, based on a PixelFeed
-	 * object's projection data and its source of pixel data.
+	 * A pairing of a 3D viewport and a 2D background, based on a
+	 * PixelFeedFromDisplayObject instance's projection data and its source of
+	 * pixel data. The 3D and 2D content are both displayed via Stage.
 	 * 
-	 * @see PixelFeed
+	 * @see PixelFeedFromDisplayObject
 	 * 
 	 * @author Joseph Howse
 	 * 
 	 * @flowerModelElementId _8HXVMKnjEeG8rNJMqBg6NQ
 	 */
-	public class ARViewport extends Sprite
+	public class ARViewportUsingStage extends AbstractARViewport
 	{
-		private const scene3D_:Object3D = new Object3D();
 		private var background_:DisplayObject;
-		private var stage3D_:Stage3D;
-		private var camera3D_:Camera3D;
-		private var showProfilingDiagram_:Boolean = false;
 		private var mirrored_:Boolean = false;
-		private var isAnyMeshOnScreen_:Boolean = false;
 		
 		
 		/**
-		 * Creates an ARViewport object that uses the specified Stage3D object
-		 * for rendering, and the specified PixelFeed object to get the 3D
-		 * field of view (FOV) and the 2D background. Optionally, near and far
-		 * clipping depths can be specified as well. If unspecified, they
-		 * default to 1 and 10000. Optionally, the 3D rendering's antialias
-		 * level can be specified. It defaults to 4.
+		 * Creates an ARViewportUsingStage object that uses the specified
+		 * Stage3D object for rendering (though not display), and the specified
+		 * PixelFeedFromDisplayObject instance to get the 3D field of view
+		 * (FOV) and the 2D background. Optionally, near and far clipping
+		 * depths can be specified as well. If unspecified, they default to 1
+		 * and 10000. Optionally, the 3D rendering's antialias level can be
+		 * specified. It defaults to 4.
 		 * 
-		 * @param stage3D The Stage3D object.
+		 * @param stage3D The 3D stage.
 		 * 
-		 * @param pixelFeed The PixelFeed object.
+		 * @param pixelFeed The pixel feed.
 		 * 
 		 * @param nearClipping The 3D projection's near clipping depth.
 		 * 
@@ -77,18 +71,30 @@ package nummist.illusion.mixedreality
 		 * 
 		 * @param antialiasLevel The antialias level to apply in 3D rendering.
 		 * 
+		 * @throws ArgumentError if any argument is <code>null</code>.
+		 * 
 		 * @flowerModelElementId _8Hnz4anjEeG8rNJMqBg6NQ
 		 */
-		public function ARViewport
+		public function ARViewportUsingStage
 		(
 			stage3D:Stage3D,
-			pixelFeed:PixelFeed,
+			pixelFeed:PixelFeedFromDisplayObject,
 			nearClipping:Number = 1,
 			farClipping:Number = 10000,
 			antialiasLevel:int = 4
 		)
 		{
 			super();
+			
+			if (!stage3D)
+			{
+				throw new ArgumentError("stage3D must be non-null");
+			}
+			
+			if (!pixelFeed)
+			{
+				throw new ArgumentError("pixelFeed must be non-null");
+			}
 			
 			stage3D_ = stage3D;
 			
@@ -110,7 +116,7 @@ package nummist.illusion.mixedreality
 				background_.width, // width
 				background_.height, // height
 				true, // renderToBitmap
-				0, // backgroundColor
+				0x000000, // backgroundColor
 				0, // backgroundAlpha
 				antialiasLevel // antiAlias
 			);
@@ -118,18 +124,18 @@ package nummist.illusion.mixedreality
 			// Hide the AlternativaPlatform logo.
 			camera3D_.view.hideLogo();
 			
-			// Add the background and 3D scene to the 2D scene.
+			// Add the background and 3D viewport to the 2D scene.
 			addChild(background_);
 			addChild(camera3D_.view);
 			
 			// Add the 3D camera to the 3D scene.
-			scene3D_.addChild(camera3D_);
+			scene3D.addChild(camera3D_);
 			
-			// Listen for frame updates.
-			addEventListener
+			// Listen for frame updates to the pixel feed's source.
+			pixelFeed.source.addEventListener
 			(
-				Event.EXIT_FRAME, // type
-				onExitFrame, // listener
+				Event.ENTER_FRAME, // type
+				onSourceEnterFrame, // listener
 				false, // useCapture
 				0, // priority
 				true // useWeakReference
@@ -138,46 +144,12 @@ package nummist.illusion.mixedreality
 		
 		
 		/**
-		 * The Object3D instance that is the root of the 3D viewport's scene.
-		 * Typically, this object is used as an argument in constructing
-		 * AbstractTracker subclass instances.
-		 */
-		public function get scene3D():Object3D
-		{
-			return scene3D_;
-		}
-		
-		/**
-		 * A value of <code>true</code> that profiling data such as FPS, CPU
-		 * usage, and memory usage are displayed in the upper right corner of
-		 * the 2D stage.
-		 */
-		public function get showProfilingDiagram():Boolean
-		{
-			return showProfilingDiagram_;
-		}
-		
-		public function set showProfilingDiagram(newShowProfilingDiagram:Boolean):void
-		{
-			if (newShowProfilingDiagram && !showProfilingDiagram_)
-			{
-				showProfilingDiagram_ = true;
-				addChildAt(camera3D_.diagram, 2);
-			}
-			else if (!newShowProfilingDiagram && showProfilingDiagram)
-			{
-				showProfilingDiagram_ = false;
-				removeChild(camera3D_.diagram);
-			}
-		}
-		
-		/**
-		 * A value of <code>true</code> that the 3D viewport and its background
-		 * (the PixelFeed object's source) are rendered with a horizontal flip,
-		 * as if seen in a mirror. Changing this property's value has the
+		 * A value of <code>true</code> means that the 3D viewport and its
+		 * background (the pixel feed's source) are rendered with a horizontal
+		 * flip, as if seen in a mirror. Changing this property's value has the
 		 * side-effect of overwriting any previous transformation of the
 		 * background. Note that in any case, transformations are irrelevant to
-		 * the way that a PixelFeed object uses its source.
+		 * the way that a pixel feed uses its source.
 		 */
 		public function get mirrored():Boolean
 		{
@@ -200,57 +172,33 @@ package nummist.illusion.mixedreality
 			}
 		}
 		
+		
 		/**
-		 * Resizes the 3D viewport and its background (the PixelFeed object's
-		 * source) to the specified dimensions.
-		 * 
-		 * @param newWidth The new width in pixels.
-		 * @param newHeight The new height in pixels.
+		 * @flowerModelElementId _hxo9gNnZEeG6Ia5yiOlRVA
 		 */
-		public function resize(newWidth:Number, newHeight:Number):void
+		override public function setFrame
+		(newX:Number, newY:Number, newWidth:Number, newHeight:Number
+		)
+		:void
 		{
-			// Resize the 3D camera's viewport.
-			camera3D_.view.width = newWidth;
-			camera3D_.view.height = newHeight;
-			
-			// Resize the viewport's background.
-			background_.width = newWidth;
-			background_.height = newHeight;
-			
-			if (mirrored_)
+			if (mirrored_ && newWidth != width)
 			{
 				// Recreate and reapply the mirror matrix, which is
-				// width-dependent.
+				// width-dependent, in order to avoid the possibility of
+				// cumulative rounding errors.
 				mirror();
 			}
+			
+			super.setFrame(newX, newY, newWidth, newHeight);
 		}
-		
 		
 		
 		/**
 		 * @flowerModelElementId _8HssYqnjEeG8rNJMqBg6NQ
 		 */
-		private function onExitFrame(event:Event):void
+		private function onSourceEnterFrame(event:Event):void
 		{
-			if (isAnyMeshIn(scene3D_))
-			{
-				// There is at least one mesh in the 3D scene.
-				
-				// Redraw the 3D scene.
-				camera3D_.render(stage3D_);
-				
-				isAnyMeshOnScreen_ = true;
-			}
-			else if (isAnyMeshOnScreen_)
-			{
-				// There is no mesh in the 3D scene but there is at least one
-				// mesh rendered on screen from last frame.
-				
-				// Redraw the 3D scene.
-				camera3D_.render(stage3D_);
-				
-				isAnyMeshOnScreen_ = false;
-			}
+			render3D();
 		}
 		
 		
@@ -265,22 +213,6 @@ package nummist.illusion.mixedreality
 			mirrorMatrix.tx = background_.width;
 			background_.transform.matrix = mirrorMatrix;
 			camera3D_.view.transform.matrix = mirrorMatrix;
-		}
-		
-		private function isAnyMeshIn(object3D:Object3D):Boolean
-		{
-			if (object3D is Mesh)
-			{
-				return true;
-			}
-			for (var i:uint; i < object3D.numChildren; i++)
-			{
-				if (isAnyMeshIn(object3D.getChildAt(i)))
-				{
-					return true;
-				}
-			}
-			return false;
 		}
 	}
 }
