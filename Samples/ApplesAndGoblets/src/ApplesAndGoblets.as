@@ -49,17 +49,15 @@ package
 	import flashx.textLayout.formats.TextAlign;
 	
 	import nummist.illusion.graphics.SceneUtils;
-	import nummist.illusion.graphics.materials.DisplayObjectMaterial;
 	import nummist.illusion.graphics.models.ExternalModelPrefab;
 	import nummist.illusion.graphics.models.ExternalModelPrefabLoader;
 	import nummist.illusion.graphics.models.IExternalModelPrefabLoaderDelegate;
-	import nummist.illusion.logic.CameraSeesActivity;
 	import nummist.illusion.mixedreality.arviewports.ARViewportUsingStage;
 	import nummist.illusion.mixedreality.arviewports.ARViewportUsingStageVideo;
 	import nummist.illusion.mixedreality.arviewports.AbstractARViewport;
-	import nummist.illusion.mixedreality.pixelfeeds.AbstractPixelFeed;
-	import nummist.illusion.mixedreality.pixelfeeds.PixelFeedFromCamera;
-	import nummist.illusion.mixedreality.pixelfeeds.PixelFeedFromDisplayObject;
+	import nummist.illusion.mixedreality.sensors.AbstractVisualSensor;
+	import nummist.illusion.mixedreality.sensors.VisualSensorFromCamera;
+	import nummist.illusion.mixedreality.sensors.VisualSensorFromDisplayObject;
 	import nummist.illusion.mixedreality.trackers.AbstractTracker;
 	import nummist.illusion.mixedreality.trackers.ITrackerDelegate;
 	import nummist.illusion.mixedreality.trackers.MarkerEvent;
@@ -86,7 +84,7 @@ package
 		
 		private var stageFrameRate_:Number;
 		private var stage3D_:Stage3D;
-		private var pixelFeed_:AbstractPixelFeed;
+		private var sensor_:AbstractVisualSensor;
 		private var arViewport_:AbstractARViewport;
 		private var flareBarcodeTracker_:FlareBarcodeTracker;
 		private var flareNaturalFeatureTracker_:FlareNaturalFeatureTracker;
@@ -178,15 +176,15 @@ package
 			{
 				var stageVideo:StageVideo = stage.stageVideos[0];
 				
-				// Create the pixel feed that draws data from the camera.
-				pixelFeed_ = new PixelFeedFromCamera(videoCamera);
+				// Create the visual sensor that draws data from the camera.
+				sensor_ = new VisualSensorFromCamera(videoCamera);
 				
 				// Create the AR viewport.
 				arViewport_ = new ARViewportUsingStageVideo
 				(
 					stageVideo,
 					stage3D_,
-					pixelFeed_ as PixelFeedFromCamera
+					sensor_ as VisualSensorFromCamera
 				);
 			}
 			else
@@ -198,14 +196,14 @@ package
 				video.deblocking = 1; // no deblocking filter (less CPU usage)
 				video.smoothing = false;
 				
-				// Create the pixel feed that draws data from the video.
-				pixelFeed_ = new PixelFeedFromDisplayObject(video);
+				// Create the visual sensor that draws data from the video.
+				sensor_ = new VisualSensorFromDisplayObject(video);
 				
 				// Create and configure the AR viewport.
 				arViewport_ = new ARViewportUsingStage
 				(
 					stage3D_,
-					pixelFeed_ as PixelFeedFromDisplayObject
+					sensor_ as VisualSensorFromDisplayObject
 				);
 				(arViewport_ as ARViewportUsingStage).mirrored = true;
 			}
@@ -314,10 +312,10 @@ package
 			// TODO: Template and data matrix markers.
 			
 			// Create the barcode tracker.
-			flareBarcodeTracker_ = new FlareBarcodeTracker(this, pixelFeed_, stage, arViewport_.scene3D, flareBarcodeFeatureSet);
+			flareBarcodeTracker_ = new FlareBarcodeTracker(this, sensor_, stage, arViewport_.scene3D, flareBarcodeFeatureSet);
 			
 			// Create the natural feature tracker.
-			flareNaturalFeatureTracker_ = new FlareNaturalFeatureTracker(this, pixelFeed_, stage, arViewport_.scene3D);
+			flareNaturalFeatureTracker_ = new FlareNaturalFeatureTracker(this, sensor_, stage, arViewport_.scene3D);
 		}
 		
 		public function onTrackerStarted
@@ -349,13 +347,13 @@ package
 				// physical marker.
 				
 				// The Austria physical marker is 480x256.
-				flareNaturalFeatureTracker_.addVirtualButton(0, 216, 104, 264, 152, 0.7, 0.8, 0.25);
+				flareNaturalFeatureTracker_.addVirtualButton(0, 216, 104, 264, 152);
 				
 				// The Vienna physical marker is 480x288.
-				flareNaturalFeatureTracker_.addVirtualButton(1, 216, 120, 264, 168, 0.7, 0.8, 0.25);
+				flareNaturalFeatureTracker_.addVirtualButton(1, 216, 120, 264, 168);
 				
 				// The Graz physical marker is 336x480.
-				flareNaturalFeatureTracker_.addVirtualButton(2, 144, 216, 192, 264, 0.7, 0.8, 0.25);
+				flareNaturalFeatureTracker_.addVirtualButton(2, 144, 216, 192, 264);
 			}
 		}
 		

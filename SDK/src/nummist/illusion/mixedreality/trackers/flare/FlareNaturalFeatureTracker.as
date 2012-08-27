@@ -37,7 +37,7 @@ package nummist.illusion.mixedreality.trackers.flare
 	import nummist.illusion.core.Loader;
 	import nummist.illusion.core.Logger;
 	import nummist.illusion.core.StringUtils;
-	import nummist.illusion.mixedreality.pixelfeeds.AbstractPixelFeed;
+	import nummist.illusion.mixedreality.sensors.AbstractVisualSensor;
 	import nummist.illusion.mixedreality.trackers.AbstractTracker;
 	import nummist.illusion.mixedreality.trackers.ITrackerDelegate;
 	import nummist.illusion.mixedreality.trackers.MarkerEvent;
@@ -85,7 +85,7 @@ package nummist.illusion.mixedreality.trackers.flare
 		 * provided the opportunity to handle virtual button presses and
 		 * releases.
 		 * 
-		 * @param pixelFeed The supplier of pixel data and projection data.
+		 * @param sensor The supplier of pixel data and projection data.
 		 * 
 		 * @param stage The stage.
 		 * 
@@ -113,14 +113,13 @@ package nummist.illusion.mixedreality.trackers.flare
 		 * consecutive, starting at 0. If this argument is omitted or
 		 * <code>null</code>, it defaults to <code>"featureSet.ini"</code>.
 		 * 
-		 * @throws ArgumentError if <code>delegate</code>,
-		 * <code>pixelFeed</code>, or <code>scene3D</code> is
-		 * <code>null</code>.
+		 * @throws ArgumentError if <code>delegate</code>, <code>sensor</code>,
+		 * or <code>scene3D</code> is <code>null</code>.
 		 */
 		public function FlareNaturalFeatureTracker
 		(
 			delegate:ITrackerDelegate,
-			pixelFeed:AbstractPixelFeed,
+			sensor:AbstractVisualSensor,
 			stage:Stage,
 			scene3D:Object3D,
 			autoStart:Boolean = true,
@@ -136,7 +135,7 @@ package nummist.illusion.mixedreality.trackers.flare
 			licenseFilename_ = (licenseFilename ? licenseFilename : "flareNFT.lic");
 			featureSetFilename_ = (featureSetFilename ? featureSetFilename : "featureSet.ini");
 			
-			super(delegate, pixelFeed, stage, scene3D, autoStart);
+			super(delegate, sensor, stage, scene3D, autoStart);
 		}
 		
 		
@@ -490,12 +489,15 @@ package nummist.illusion.mixedreality.trackers.flare
 			// Release the loader.
 			loader_ = null;
 			
+			var visualSensor:AbstractVisualSensor =
+				sensor_ as AbstractVisualSensor;
+			
 			// Generate the camera configuration and supply it to the native
 			// tracker.
 			cLibInit_.supplyFile
 			(
 				"data/cam.ini",
-				FlareUtils.rawCamConfig(pixelFeed_)
+				FlareUtils.rawCamConfig(visualSensor)
 			);
 			
 			nativeTracker_ = cLibInit_.init();
@@ -506,8 +508,8 @@ package nummist.illusion.mixedreality.trackers.flare
 			if (!nativeTracker_.initTracker
 			(
 				stage_,
-				pixelFeed_.width,
-				pixelFeed_.height,
+				visualSensor.width,
+				visualSensor.height,
 				multiTargets_,
 				stage_.frameRate, // value seems not to matter
 				"data/cam.ini"

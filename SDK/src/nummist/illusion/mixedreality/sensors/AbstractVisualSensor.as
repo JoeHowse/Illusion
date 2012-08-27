@@ -24,43 +24,27 @@ josephhowse@nummist.com
 */
 
 
-package nummist.illusion.mixedreality.pixelfeeds
+package nummist.illusion.mixedreality.sensors
 {
-	import flash.utils.ByteArray;
-	
-	import nummist.illusion.logic.ILogicalStatement;
-	
-	
 	/**
 	 * A producer of pixel data and projection data, as used by AbstractTracker
-	 * subclasses and other IPixelFeedSubscriber implementations.
+	 * subclasses and other ISensorSubscriber implementations.
 	 * 
 	 * @see AbstractTracker
-	 * @see IPixelFeedSubscriber
+	 * @see ISensorSubscriber
 	 * 
 	 * @author Joseph Howse
 	 * 
 	 * @flowerModelElementId _hyB_ENnZEeG6Ia5yiOlRVA
 	 */
-	public class AbstractPixelFeed
+	public class AbstractVisualSensor extends AbstractSensor
 	{
-		/**
-		 * A condition that must be true in order for the pixel data to be
-		 * updated. If the condition is <code>null</code> (the default), the
-		 * pixel data is updated every frame.
-		 */
-		public var redrawCondition:ILogicalStatement;
-		
-		
-		protected const subscribers_:Vector.<IPixelFeedSubscriber> =
-			new Vector.<IPixelFeedSubscriber>();
 		protected var diagonalFOV_:Number;
 		protected var width_:uint;
 		protected var height_:uint;
-		protected var pixels_:ByteArray;
 		
 		/**
-		 * Creates an AbstractPixelFeed object.
+		 * Creates an AbstractVisualSensor object.
 		 * <br /><br />
 		 * Do not invoke this constructor; it is intended for use by subclasses
 		 * only.
@@ -75,9 +59,11 @@ package nummist.illusion.mixedreality.pixelfeeds
 		 * 
 		 * @flowerModelElementId _hyEbUNnZEeG6Ia5yiOlRVA
 		 */
-		public function AbstractPixelFeed
-		( // 72 degrees
-fov:Number=1.25663706143591729539, width:uint=320, height:uint=240
+		public function AbstractVisualSensor
+		(
+			fov:Number=1.25663706143591729539, // 72 degrees
+			width:uint=320,
+			height:uint=240
 		)
 		{
 			if (fov <= 0)
@@ -123,70 +109,6 @@ fov:Number=1.25663706143591729539, width:uint=320, height:uint=240
 		public function get height():uint
 		{
 			return height_;
-		}
-		
-		/**
-		 * A handle to the latest pixel data with its pointer rewound to index
-		 * 0. The data is current at the time when subscribers receive a call
-		 * to <code>onPixelDataUpdated</code>.
-		 * 
-		 * @see IPixelFeedSubscriber
-		 */
-		public function get pixels():ByteArray
-		{
-			// Rewind the file pointer.
-			pixels_.position = 0;
-			
-			return pixels_;
-		}
-		
-		
-		/**
-		 * Start notifying the specified object about updates to the pixel
-		 * data.
-		 * 
-		 * @param subscriber The subscriber.
-		 */
-		public function addSubscriber(subscriber:IPixelFeedSubscriber):void
-		{
-			subscribers_.push(subscriber);
-		}
-		
-		/**
-		 * If the specified object is being notified about updates to the pixel
-		 * data, stop notifying it.
-		 * 
-		 * @param subscriber The subscriber.
-		 */
-		public function removeSubscriber(subscriber:IPixelFeedSubscriber):void
-		{
-			var i:int = subscribers_.indexOf(subscriber);
-			if (i != -1)
-			{
-				subscribers_.splice(i, 1);
-			}
-		}
-		
-		/**
-		 * Stop notifying all objects about updates to the pixel data.
-		 */
-		public function removeAllSubscribers():void
-		{
-			subscribers_.splice(0, subscribers_.length);
-		}
-		
-		
-		/**
-		 * Notify subscribers that the pixel data has been updated.
-		 * 
-		 * @flowerModelElementId _hyIFsNnZEeG6Ia5yiOlRVA
-		 */
-		protected function dispatchUpdateNotice():void
-		{
-			for each (var subscriber:IPixelFeedSubscriber in subscribers_)
-			{
-				subscriber.onPixelFeedUpdated(this);
-			}
 		}
 	}
 }

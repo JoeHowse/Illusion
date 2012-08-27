@@ -31,7 +31,7 @@ package nummist.illusion.mixedreality.trackers
 	import flash.display.Stage;
 	import flash.utils.ByteArray;
 	
-	import nummist.illusion.mixedreality.pixelfeeds.AbstractPixelFeed;
+	import nummist.illusion.mixedreality.sensors.AbstractVisualSensor;
 	
 	
 	/**
@@ -47,13 +47,13 @@ package nummist.illusion.mixedreality.trackers
 		public function DebugTracker
 		(
 			delegate:ITrackerDelegate,
-			pixelFeed:AbstractPixelFeed,
+			sensor:AbstractVisualSensor,
 			stage:Stage,
 			scene3D:Object3D,
 			autoStart:Boolean=true
 		)
 		{
-			super(delegate, pixelFeed, stage, scene3D, autoStart);
+			super(delegate, sensor, stage, scene3D, autoStart);
 		}
 		
 		
@@ -61,7 +61,9 @@ package nummist.illusion.mixedreality.trackers
 		{
 			super.start();
 			
-			var numPixels:uint = pixelFeed_.width * pixelFeed_.height;
+			var visualSensor:AbstractVisualSensor =
+				sensor_ as AbstractVisualSensor;
+			var numPixels:uint = visualSensor.width * visualSensor.height;
 			
 			// Unfix the number of marker pools.
 			markerPools.fixed = false;

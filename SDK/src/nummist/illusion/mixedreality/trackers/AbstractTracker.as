@@ -32,31 +32,30 @@ package nummist.illusion.mixedreality.trackers
 	import flash.display.Stage;
 	import flash.events.Event;
 	import flash.utils.ByteArray;
-	import nummist.illusion.mixedreality.pixelfeeds.AbstractPixelFeed;
-	import nummist.illusion.mixedreality.pixelfeeds.IPixelFeedSubscriber;
+	import nummist.illusion.mixedreality.sensors.AbstractSensor;
+	import nummist.illusion.mixedreality.sensors.ISensorSubscriber;
 	
 	
 	/**
-	 * A consumer of pixel data and projection data, as produced by an
-	 * AbstractPixelFeed subclass instance, and a producer of MarkerPool
-	 * objects that contain de-projected representations of particular
-	 * features in the pixel data.
+	 * A consumer of sensor data, as produced by an AbstractSensor subclass
+	 * instance, and a producer of MarkerPool objects that contain virtual
+	 * representations of particular features in the sensor data.
 	 * <br /><br />
 	 * To avoid memory leaks, invoke the <code>stop()</code> method once this
 	 * object is no longer in use.
 	 * 
 	 * @see MarkerPool
-	 * @see AbstractPixelFeed
+	 * @see AbstractSensor
 	 * 
 	 * @author Joseph Howse
 	 * 
 	 * @flowerModelElementId _8FGrY6njEeG8rNJMqBg6NQ
 	 */
-	public class AbstractTracker implements IPixelFeedSubscriber
+	public class AbstractTracker implements ISensorSubscriber
 	{
 		/**
 		 * MarkerPool objects that each correspond to a particular marker ID
-		 * being tracked in the pixel data. Wherever a physical occurence
+		 * being tracked in the sensor data. Wherever a physical occurence
 		 * of the marker ID is identified, a virtual marker may be drawn from
 		 * the MarkerPool object and placed in the 3D scene, provided that
 		 * enough virtual markers are available.
@@ -76,7 +75,7 @@ package nummist.illusion.mixedreality.trackers
 		
 		
 		protected var delegate_:ITrackerDelegate;
-		protected var pixelFeed_:AbstractPixelFeed;
+		protected var sensor_:AbstractSensor;
 		protected var stage_:Stage;
 		protected var scene3D_:Object3D;
 		
@@ -91,7 +90,7 @@ package nummist.illusion.mixedreality.trackers
 		 * populate the MarkerPool objects when they are created and when they
 		 * are asked for more markers than they have.
 		 * 
-		 * @param pixelFeed The supplier of pixel data and projection data.
+		 * @param sensor The supplier of sensor data.
 		 * 
 		 * @param stage The stage.
 		 * 
@@ -105,7 +104,7 @@ package nummist.illusion.mixedreality.trackers
 		public function AbstractTracker
 		(
 			delegate:ITrackerDelegate,
-			pixelFeed:AbstractPixelFeed,
+			sensor:AbstractSensor,
 			stage:Stage,
 			scene3D:Object3D,
 			autoStart:Boolean = true
@@ -116,9 +115,9 @@ package nummist.illusion.mixedreality.trackers
 				throw new ArgumentError("delegate must be non-null");
 			}
 			
-			if (!pixelFeed)
+			if (!sensor)
 			{
-				throw new ArgumentError("pixelFeed must be non-null");
+				throw new ArgumentError("sensor must be non-null");
 			}
 			
 			if (!stage)
@@ -132,7 +131,7 @@ package nummist.illusion.mixedreality.trackers
 			}
 			
 			delegate_ = delegate;
-			pixelFeed_ = pixelFeed;
+			sensor_ = sensor;
 			stage_ = stage;
 			scene3D_ = scene3D;
 			
@@ -147,20 +146,20 @@ package nummist.illusion.mixedreality.trackers
 		
 		
 		/**
-		 * Start tracking features in the pixel data provided by the 
-		 * AbstractPixelFeed subclass instance. Also start updating markers
-		 * held by the MarkerPool objects.
+		 * Start tracking features in the data provided by the AbstractSensor
+		 * subclass instance. Also start updating markers held by the
+		 * MarkerPool objects.
 		 */
 		public function start():void
 		{
-			// Update the tracker each time the pixel feed is updated.
-			pixelFeed_.addSubscriber(this);
+			// Update the tracker each time the sensor data is updated.
+			sensor_.addSubscriber(this);
 		}
 		
 		/**
-		 * Stop tracking features in the pixel data provided by the
-		 * AbstractPixelFeed subclass instance. Also stop updating markers held
-		 * by the MarkerPool objects.
+		 * Stop tracking features in the data provided by the AbstractSensor
+		 * subclass instance. Also stop updating markers held by the MarkerPool
+		 * objects.
 		 * <br /><br />
 		 * Anytime later, to restart tracking and marker updates, invoke
 		 * <code>start()</code> again.
@@ -170,27 +169,27 @@ package nummist.illusion.mixedreality.trackers
 		 */
 		public function stop():void
 		{
-			// Stop updating the tracker each time the pixel feed is updated.
-			pixelFeed_.removeSubscriber(this);
+			// Stop updating the tracker each time the sensor data is updated.
+			sensor_.removeSubscriber(this);
 		}
 		
 		
 		protected function updateTrackedMarkers
 		(
 			markerPoolIterators:Vector.<MarkerPoolIterator>,
-			pixels:ByteArray
+			data:ByteArray
 		)
 		:void {}
 		
 		
 		/**
-		 * Part of the IPixelFeedSubscriber implementation.
+		 * Part of the ISensorSubscriber implementation.
 		 * <br /><br />
 		 * Do not invoke this method; it is intended solely for use by the
-		 * AbstractPixelFeed subclass instance passed to this object's
+		 * AbstractSensor subclass instance passed to this object's
 		 * constructor.
 		 */
-		public function onPixelFeedUpdated(pixelFeed:AbstractPixelFeed):void
+		public function onSensorDataUpdated(sensor:AbstractSensor):void
 		{
 			// Get iterators for the marker pools.
 			var markerPoolIterators:Vector.<MarkerPoolIterator> = new Vector.<MarkerPoolIterator>();
@@ -200,7 +199,7 @@ package nummist.illusion.mixedreality.trackers
 			}
 			
 			// Update the tracked markers.
-			updateTrackedMarkers(markerPoolIterators, pixelFeed_.pixels);
+			updateTrackedMarkers(markerPoolIterators, sensor_.data);
 			
 			// Update the untracked markers.
 			updateUntrackedMarkers(markerPoolIterators);

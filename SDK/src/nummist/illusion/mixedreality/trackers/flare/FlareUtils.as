@@ -31,7 +31,7 @@ package nummist.illusion.mixedreality.trackers.flare
 	import flash.geom.Rectangle;
 	import flash.utils.ByteArray;
 	
-	import nummist.illusion.mixedreality.pixelfeeds.AbstractPixelFeed;
+	import nummist.illusion.mixedreality.sensors.AbstractVisualSensor;
 	
 
 	internal class FlareUtils
@@ -39,11 +39,11 @@ package nummist.illusion.mixedreality.trackers.flare
 		private static var matrixRawVector:Vector.<Number> = new Vector.<Number>(16);
 		
 		
-		internal static function rawCamConfig(pixelFeed:AbstractPixelFeed):ByteArray
+		internal static function rawCamConfig(sensor:AbstractVisualSensor):ByteArray
 		{
-			var width:uint = pixelFeed.width;
-			var height:uint = pixelFeed.height;
-			var diagonalFOV:Number = pixelFeed.diagonalFOV;
+			var width:uint = sensor.width;
+			var height:uint = sensor.height;
+			var diagonalFOV:Number = sensor.diagonalFOV;
 			
 			// Calculate the focal length based on the dimensions and FOV.
 			var focalLength:Number =

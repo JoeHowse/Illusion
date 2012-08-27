@@ -24,29 +24,29 @@ josephhowse@nummist.com
 */
 
 
-package nummist.illusion.mixedreality.pixelfeeds
+package nummist.illusion.mixedreality.sensors
 {
 	/**
-	 * A subscriber providing a callback to a one or more AbstactPixelFeed
+	 * A subscriber providing a callback to a one or more AbstactSensor
 	 * subclass instances.
 	 * 
-	 * @see AbstractPixelFeed
+	 * @see AbstractSensor
 	 * 
 	 * @author Joseph Howse
 	 * 
 	 * @flowerModelElementId _hyRPoNnZEeG6Ia5yiOlRVA
 	 */
-	public interface IPixelFeedSubscriber
+	public interface ISensorSubscriber
 	{
 		/**
-		 * Handles the event that updated pixel data is availble from the
-		 * specified feed. Typically, this callback will fetch a handle to the
-		 * pixel data from <code>pixelFeed.pixels</code>.
+		 * Handles the event that updated data is availble from the
+		 * specified sensor. Typically, this callback will fetch a handle to
+		 * the data from <code>sensor.data</code>.
 		 * 
-		 * @param pixelFeed The pixel feed.
+		 * @param sensor The sensor.
 		 * 
-		 * @see AbstractPixelFeed.pixels
+		 * @see AbstractSensor.data
 		 */
-		function onPixelFeedUpdated(pixelFeed:AbstractPixelFeed):void;
+		function onSensorDataUpdated(sensor:AbstractSensor):void;
 	}
 }

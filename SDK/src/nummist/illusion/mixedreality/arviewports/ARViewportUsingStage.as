@@ -33,15 +33,15 @@ package nummist.illusion.mixedreality.arviewports
 	import flash.display.Stage3D;
 	import flash.events.Event;
 	import flash.geom.Matrix;
-	import nummist.illusion.mixedreality.pixelfeeds.PixelFeedFromDisplayObject;
+	import nummist.illusion.mixedreality.sensors.VisualSensorFromDisplayObject;
 	
 	
 	/**
 	 * A pairing of a 3D viewport and a 2D background, based on a
-	 * PixelFeedFromDisplayObject instance's projection data and its source of
-	 * pixel data. The 3D and 2D content are both displayed via Stage.
+	 * VisualSensorFromDisplayObject instance's projection data and its source
+	 * of pixel data. The 3D and 2D content are both displayed via Stage.
 	 * 
-	 * @see PixelFeedFromDisplayObject
+	 * @see VisualSensorFromDisplayObject
 	 * 
 	 * @author Joseph Howse
 	 * 
@@ -56,7 +56,7 @@ package nummist.illusion.mixedreality.arviewports
 		/**
 		 * Creates an ARViewportUsingStage object that uses the specified
 		 * Stage3D object for rendering (though not display), and the specified
-		 * PixelFeedFromDisplayObject instance to get the 3D field of view
+		 * VisualSensorFromDisplayObject instance to get the 3D field of view
 		 * (FOV) and the 2D background. Optionally, near and far clipping
 		 * depths can be specified as well. If unspecified, they default to 1
 		 * and 10000. Optionally, the 3D rendering's antialias level can be
@@ -64,7 +64,7 @@ package nummist.illusion.mixedreality.arviewports
 		 * 
 		 * @param stage3D The 3D stage.
 		 * 
-		 * @param pixelFeed The pixel feed.
+		 * @param visualSensor The visual sensor.
 		 * 
 		 * @param nearClipping The 3D projection's near clipping depth.
 		 * 
@@ -79,7 +79,7 @@ package nummist.illusion.mixedreality.arviewports
 		public function ARViewportUsingStage
 		(
 			stage3D:Stage3D,
-			pixelFeed:PixelFeedFromDisplayObject,
+			visualSensor:VisualSensorFromDisplayObject,
 			nearClipping:Number = 1,
 			farClipping:Number = 10000,
 			antialiasLevel:int = 4
@@ -92,26 +92,26 @@ package nummist.illusion.mixedreality.arviewports
 				throw new ArgumentError("stage3D must be non-null");
 			}
 			
-			if (!pixelFeed)
+			if (!visualSensor)
 			{
-				throw new ArgumentError("pixelFeed must be non-null");
+				throw new ArgumentError("visualSensor must be non-null");
 			}
 			
 			stage3D_ = stage3D;
 			
-			// Get the the pixel feed's source for use as the viewport's
+			// Get the the visual sensor's source for use as the viewport's
 			// background.
-			background_ = pixelFeed.source;
+			background_ = visualSensor.source;
 			
 			// Create the 3D camera.
 			camera3D_ = new Camera3D(nearClipping, farClipping);
 			
-			// Set the 3D camera's FOV based on the pixel feed.
-			camera3D_.fov = pixelFeed.diagonalFOV;
+			// Set the 3D camera's FOV based on the visual sensor.
+			camera3D_.fov = visualSensor.diagonalFOV;
 			
 			// Configure the 3D camera to render to a texture in the 2D
-			// context. This texture's background is transparent, so the pixel
-			// feed's source shows through as if part of the 3D scene.
+			// context. This texture's background is transparent, so the visual
+			// sensor's source shows through as if part of the 3D scene.
 			camera3D_.view = new View
 			(
 				background_.width, // width
@@ -132,11 +132,11 @@ package nummist.illusion.mixedreality.arviewports
 			// Add the 3D camera to the 3D scene.
 			scene3D.addChild(camera3D_);
 			
-			// Listen for frame updates to the pixel feed's source. The
+			// Listen for frame updates to the visual sensor's source. The
 			// listener has the lowest possible priority value, such that other
 			// listeners' results (including tracking results) tend to be
 			// available without a frame lag.
-			pixelFeed.source.addEventListener
+			visualSensor.source.addEventListener
 			(
 				Event.EXIT_FRAME, // type
 				onSourceExitFrame, // listener
@@ -149,11 +149,11 @@ package nummist.illusion.mixedreality.arviewports
 		
 		/**
 		 * A value of <code>true</code> means that the 3D viewport and its
-		 * background (the pixel feed's source) are rendered with a horizontal
-		 * flip, as if seen in a mirror. Changing this property's value has the
-		 * side-effect of overwriting any previous transformation of the
-		 * background. Note that in any case, transformations are irrelevant to
-		 * the way that a pixel feed uses its source.
+		 * background (the visual sensor's source) are rendered with a
+		 * horizontal flip, as if seen in a mirror. Changing this property's
+		 * value has the side-effect of overwriting any previous transformation
+		 * of the background. Note that in any case, transformations are
+		 * irrelevant to the way that a visual sensor uses its source.
 		 */
 		public function get mirrored():Boolean
 		{

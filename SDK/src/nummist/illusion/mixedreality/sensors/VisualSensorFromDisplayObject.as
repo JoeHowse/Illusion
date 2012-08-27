@@ -24,7 +24,7 @@ josephhowse@nummist.com
 */
 
 
-package nummist.illusion.mixedreality.pixelfeeds
+package nummist.illusion.mixedreality.sensors
 {
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -39,20 +39,20 @@ package nummist.illusion.mixedreality.pixelfeeds
 	
 	/**
 	 * A producer of pixel data and projection data, as used by AbstractTracker
-	 * subclasses, other IPixelFeedSubscriber implementations, and
+	 * subclasses, other ISensorSubscriber implementations, and
 	 * ARViewportUsingStage.
 	 * 
 	 * @see AbstractTracker
 	 * 
 	 * @see ARViewportUsingStage
 	 * 
-	 * @see IPixelFeedSubscriber
+	 * @see ISensorSubscriber
 	 * 
 	 * @author Joseph Howse
 	 * 
 	 * @flowerModelElementId _8JkUoKnjEeG8rNJMqBg6NQ
 	 */
-	public class PixelFeedFromDisplayObject extends AbstractPixelFeed
+	public class VisualSensorFromDisplayObject extends AbstractVisualSensor
 	{
 		private var source_:DisplayObject;
 		private var bitmapData_:BitmapData;
@@ -61,18 +61,18 @@ package nummist.illusion.mixedreality.pixelfeeds
 		
 		
 		/**
-		 * Creates a PixelFeedFromDisplayObject instance with the specified
+		 * Creates a VisualSensorFromDisplayObject instance with the specified
 		 * source, diagonal FOV (field of view), width, and height. Typically,
 		 * the source will be a Video object with an attached Camera object. In
 		 * this case, the specified FOV represents the FOV of the physical
 		 * camera. If FOV is not specified, it defaults to 0.4 * pi (72
 		 * degrees), which is a guestimated median for webcams. Width and
 		 * height refer to an output resolution, as used by AbstractTracker
-		 * subclasses that are instantiated with the PixelFeedFromDisplayObject
-		 * instance. These dimensions may differ from the width and height of
-		 * the Camera object, Video object, or other source, yet the aspect
-		 * ratios should match. If not specified, width and height default to
-		 * 320x240.
+		 * subclasses that are instantiated with the
+		 * VisualSensorFromDisplayObject instance. These dimensions may differ
+		 * from the width and height of the Camera object, Video object, or
+		 * other source, yet the aspect ratios should match. If not specified,
+		 * width and height default to 320x240.
 		 * <br /><br />
 		 * In general, the source may be any DisplayObject instance (not
 		 * necessarily a Video object). It is recommended that the source and
@@ -95,7 +95,7 @@ package nummist.illusion.mixedreality.pixelfeeds
 		 * 
 		 * @flowerModelElementId _8Jmw4qnjEeG8rNJMqBg6NQ
 		 */
-		public function PixelFeedFromDisplayObject
+		public function VisualSensorFromDisplayObject
 			(
 				source:DisplayObject,
 				fov:Number = 1.25663706143591729539, // 72 degrees
@@ -169,7 +169,7 @@ package nummist.illusion.mixedreality.pixelfeeds
 			);
 			
 			// Expose the drawing's pixels.
-			pixels_ = bitmapData_.getPixels(rect_);
+			data_ = bitmapData_.getPixels(rect_);
 			
 			// Notify subscribers that the pixels have changed.
 			dispatchUpdateNotice();

@@ -37,7 +37,7 @@ package nummist.illusion.mixedreality.trackers.flare
 	import nummist.illusion.core.Loader;
 	import nummist.illusion.core.Logger;
 	import nummist.illusion.core.StringUtils;
-	import nummist.illusion.mixedreality.pixelfeeds.AbstractPixelFeed;
+	import nummist.illusion.mixedreality.sensors.AbstractVisualSensor;
 	import nummist.illusion.mixedreality.trackers.AbstractTracker;
 	import nummist.illusion.mixedreality.trackers.ITrackerDelegate;
 	import nummist.illusion.mixedreality.trackers.MarkerEvent;
@@ -104,7 +104,7 @@ package nummist.illusion.mixedreality.trackers.flare
 		 * provided the opportunity to handle the message decoded from any
 		 * data matrix barcode when the barcode is newly found.
 		 * 
-		 * @param pixelFeed The supplier of pixel data and projection data.
+		 * @param sensor The supplier of pixel data and projection data.
 		 * 
 		 * @param stage The stage.
 		 * 
@@ -124,16 +124,16 @@ package nummist.illusion.mixedreality.trackers.flare
 		 * relative to dataPath. If this argument is omitted or
 		 * <code>null</code>, it defaults to <code>"flareTracker.lic"</code>.
 		 * 
-		 * @throws ArgumentError if <code>delegate</code>,
-		 * <code>pixelFeed</code>, <code>scene3D</code>, or
-		 * <code>featureSet</code> is <code>null</code>.
+		 * @throws ArgumentError if <code>delegate</code>, <code>sensor</code>,
+		 * <code>scene3D</code>, or <code>featureSet</code> is
+		 * <code>null</code>.
 		 * 
 		 * @flowerModelElementId _8FbbgKnjEeG8rNJMqBg6NQ
 		 */
 		public function FlareBarcodeTracker
 		(
 			delegate:ITrackerDelegate,
-			pixelFeed:AbstractPixelFeed,
+			sensor:AbstractVisualSensor,
 			stage:Stage,
 			scene3D:Object3D,
 			featureSet:FlareBarcodeFeatureSet,
@@ -149,7 +149,7 @@ package nummist.illusion.mixedreality.trackers.flare
 			
 			if (featureSet_)
 			{
-				super(delegate, pixelFeed, stage, scene3D, autoStart);
+				super(delegate, sensor, stage, scene3D, autoStart);
 			}
 			else
 			{
@@ -302,7 +302,7 @@ package nummist.illusion.mixedreality.trackers.flare
 		override protected function updateTrackedMarkers
 		(
 			markerPoolIterators:Vector.<MarkerPoolIterator>,
-			pixels:ByteArray
+			data:ByteArray
 		)
 		:void
 		{
@@ -314,7 +314,7 @@ package nummist.illusion.mixedreality.trackers.flare
 			
 			// Write the pixels to the native buffer.
 			nativeBuffer_.position = nativeImagePointer_;
-			nativeBuffer_.writeBytes(pixels);	
+			nativeBuffer_.writeBytes(data);	
 			
 			// Update the native tracker and get the number of markers found.
 			var numMarkersTracked:uint = nativeTracker_.update();
@@ -447,12 +447,15 @@ package nummist.illusion.mixedreality.trackers.flare
 			{
 				cLibInit_.supplyFile("flareTracker.lic", data);
 				
+				var visualSensor:AbstractVisualSensor =
+					sensor_ as AbstractVisualSensor;
+				
 				// Generate the camera configuration and supply it to the
 				// native tracker.
 				cLibInit_.supplyFile
 				(
 					"data/cam.ini",
-					FlareUtils.rawCamConfig(pixelFeed_)
+					FlareUtils.rawCamConfig(visualSensor)
 				);
 				
 				nativeTracker_ = cLibInit_.init();
@@ -462,8 +465,8 @@ package nummist.illusion.mixedreality.trackers.flare
 				if (!nativeTracker_.initTracker
 				(
 					stage_,
-					pixelFeed_.width,
-					pixelFeed_.height,
+					visualSensor.width,
+					visualSensor.height,
 					"data/cam.ini"
 				))
 				{

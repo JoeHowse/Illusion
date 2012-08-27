@@ -44,7 +44,7 @@ package
 	import flash.utils.getTimer;
 	
 	import nummist.illusion.mixedreality.arviewports.ARViewportUsingStage;
-	import nummist.illusion.mixedreality.pixelfeeds.PixelFeedFromDisplayObject;
+	import nummist.illusion.mixedreality.sensors.VisualSensorFromDisplayObject;
 	import nummist.illusion.mixedreality.trackers.AbstractTracker;
 	import nummist.illusion.mixedreality.trackers.DebugTracker;
 	import nummist.illusion.mixedreality.trackers.ITrackerDelegate;
@@ -62,7 +62,7 @@ package
 		private var stageFrameRate_:Number;
 		private var background_:Shape;
 		private var stage3D_:Stage3D;
-		private var pixelFeed_:PixelFeedFromDisplayObject;
+		private var sensor_:VisualSensorFromDisplayObject;
 		private var arViewport_:ARViewportUsingStage;
 		private var tracker_:DebugTracker;
 		private var lastMilliseconds_:int;
@@ -117,8 +117,8 @@ package
 			background_.graphics.drawRect(0, 0, stage.stageWidth, stage.stageHeight);
 			background_.graphics.endFill();
 			
-			// Create the pixel feed that draws data from the shape.
-			pixelFeed_ = new PixelFeedFromDisplayObject
+			// Create the visual sensor that draws data from the shape.
+			sensor_ = new VisualSensorFromDisplayObject
 			(
 				background_, // source
 				1.2566370614359172, // fov: 72 degrees
@@ -127,7 +127,7 @@ package
 			);
 			
 			// Create the AR viewport.
-			arViewport_ = new ARViewportUsingStage(stage3D_, pixelFeed_);
+			arViewport_ = new ARViewportUsingStage(stage3D_, sensor_);
 			
 			// Add the AR viewport to the 2D scene.
 			addChild(arViewport_);
@@ -145,7 +145,7 @@ package
 			stage3D_.removeEventListener(Event.CONTEXT3D_CREATE, onContextCreate);
 			
 			// Create the tracker.
-			tracker_ = new DebugTracker(this, pixelFeed_, stage, arViewport_.scene3D);
+			tracker_ = new DebugTracker(this, sensor_, stage, arViewport_.scene3D);
 			
 			// Listen for frame updates.
 			if (ARTIFICIALLY_INDUCE_LAG)

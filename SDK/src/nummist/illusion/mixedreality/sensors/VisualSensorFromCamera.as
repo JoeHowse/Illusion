@@ -24,7 +24,7 @@ josephhowse@nummist.com
 */
 
 
-package nummist.illusion.mixedreality.pixelfeeds
+package nummist.illusion.mixedreality.sensors
 {
 	import flash.display.BitmapData;
 	import flash.display.StageQuality;
@@ -36,20 +36,20 @@ package nummist.illusion.mixedreality.pixelfeeds
 	
 	/**
 	 * A producer of pixel data and projection data, as used by AbstractTracker
-	 * subclasses, other IPixelFeedSubscriber implementations, and
+	 * subclasses, other ISensorSubscriber implementations, and
 	 * ARViewportUsingStageVideo.
 	 * 
 	 * @see AbstractTracker
 	 * 
 	 * @see ARViewportUsingStageVideo
 	 * 
-	 * @see IPixelFeedSubscriber
+	 * @see ISensorSubscriber
 	 * 
 	 * @author Joseph Howse
 	 * 
 	 * @flowerModelElementId _hyhuUNnZEeG6Ia5yiOlRVA
 	 */
-	public class PixelFeedFromCamera extends AbstractPixelFeed
+	public class VisualSensorFromCamera extends AbstractVisualSensor
 	{
 		private var source_:Camera;
 		private var intermediateBitmapData_:BitmapData;
@@ -59,17 +59,17 @@ package nummist.illusion.mixedreality.pixelfeeds
 		
 		
 		/**
-		 * Creates a PixelFeedFromCamera instance with the specified source,
+		 * Creates a VisualSensorFromCamera instance with the specified source,
 		 * diagonal FOV (field of view), width, and height. The source is a
 		 * Camera object, typically attached to a Video or StageVideo object.
 		 * The specified FOV represents the FOV of the physical camera. If FOV
 		 * is not specified, it defaults to 0.4 * pi (72 degrees), which is a
 		 * guestimated median for webcams. Width and height refer to an output
 		 * resolution, as used by AbstractTracker subclasses that are
-		 * instantiated with the PixelFeedFromCamera object. These dimensions
-		 * may differ from the width and height of the Camera object, yet the
-		 * aspect ratios should match. If not specified, width and height
-		 * default to 320x240.
+		 * instantiated with the VisualSensorFromCamera object. These
+		 * dimensions may differ from the width and height of the Camera
+		 * object, yet the aspect ratios should match. If not specified, width
+		 * and height default to 320x240.
 		 * 
 		 * @param source The camera whose pixel data is to be captured.
 		 * 
@@ -82,7 +82,7 @@ package nummist.illusion.mixedreality.pixelfeeds
 		 * @throws ArgumentError if source is <code>null</code> or any
 		 * numerical argument is non-positive.
 		 */
-		public function PixelFeedFromCamera
+		public function VisualSensorFromCamera
 		(
 			source:Camera,
 			fov:Number = 1.25663706143591729539, // 72 degrees
@@ -187,7 +187,7 @@ package nummist.illusion.mixedreality.pixelfeeds
 			);
 			
 			// Expose the scaled drawing's pixels.
-			pixels_ = finalBitmapData_.getPixels(rect_);
+			data_ = finalBitmapData_.getPixels(rect_);
 			
 			// Notify subscribers that the pixels have changed.
 			dispatchUpdateNotice();

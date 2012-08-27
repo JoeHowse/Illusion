@@ -23,11 +23,12 @@
     <classEntry path="nummist.illusion.logic.ILogicalStatement"/>
     <classEntry path="nummist.illusion.logic.CameraSeesActivity"/>
     <classEntry path="nummist.illusion.mixedreality.arviewports.ARViewportUsingStageVideo"/>
-    <classEntry path="nummist.illusion.mixedreality.pixelfeeds.AbstractPixelFeed"/>
-    <classEntry path="nummist.illusion.mixedreality.pixelfeeds.PixelFeedFromCamera"/>
-    <classEntry path="nummist.illusion.mixedreality.pixelfeeds.IPixelFeedSubscriber"/>
+    <classEntry path="nummist.illusion.mixedreality.sensors.AbstractVisualSensor"/>
+    <classEntry path="nummist.illusion.mixedreality.sensors.VisualSensorFromCamera"/>
+    <classEntry path="nummist.illusion.mixedreality.sensors.ISensorSubscriber"/>
     <classEntry path="nummist.illusion.mixedreality.arviewports.AbstractARViewport"/>
     <classEntry path="nummist.illusion.mixedreality.trackers.DebugTracker"/>
+    <classEntry path="nummist.illusion.mixedreality.sensors.AbstractSensor"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
